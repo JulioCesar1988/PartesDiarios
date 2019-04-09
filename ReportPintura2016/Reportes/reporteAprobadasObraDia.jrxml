@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteEmpleados" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="0669ae7b-8d76-46bd-8c17-b87f8d7c6c31">
+	<property name="ireport.zoom" value="3.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<style name="Fila" fontName="Verdana" fontSize="8" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+			<style mode="Opaque" backcolor="#F0EFEF" pdfFontName="Helvetica"/>
+		</conditionalStyle>
+	</style>
+	<style name="Header Header" mode="Opaque" forecolor="#000000" backcolor="#0000CC" fill="Solid" fontName="DejaVu Sans" fontSize="10" isBold="true"/>
+	<style name="Titulo" mode="Transparent" forecolor="#000000" backcolor="#000000" fontSize="22" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<parameter name="obra_num" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="jc" class="java.lang.Boolean">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[declare @todasLasObras bit
+set @todasLasObras=$P{jc}
+
+select COUNT(*) as 'cant',dia from (select DATEPART(WEEKDAY,Paquete_Empleado_Aprobado.fecha) as cant,CASE
+  WHEN DATEPART(dw,Paquete_Empleado_Aprobado.fecha) = 7
+   then '7-Domingo'
+  WHEN DATEPART(dw,Paquete_Empleado_Aprobado.fecha) = 1
+   then '1-Lunes'
+  when DATEPART(dw,Paquete_Empleado_Aprobado.fecha) = 2
+   then '2-Martes'
+  WHEN DATEPART(dw,Paquete_Empleado_Aprobado.fecha) = 3
+   then '3-Miercoles'
+  WHEN DATEPART(dw,Paquete_Empleado_Aprobado.fecha) = 4
+   then '4-Jueves'
+  WHEN DATEPART(dw,Paquete_Empleado_Aprobado.fecha) = 5
+   then '5-Viernes'
+  WHEN DATEPART(dw,Paquete_Empleado_Aprobado.fecha) = 6
+   then '6-Sabado'
+END as dia
+from Obras inner join Paquetes on obras.id_obra=paquetes.id_obra and paquetes.activado=1
+inner join Paquete_Empleado_Aprobado on paquetes.id_paquete=Paquete_Empleado_Aprobado.id_paquete
+where obras.numero=$P{obra_num} or @todasLasObras=1 ) as tabla
+
+group by cant,dia]]>
+	</queryString>
+	<field name="cant" class="java.lang.Integer"/>
+	<field name="dia" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="69" splitType="Stretch">
+			<staticText>
+				<reportElement style="Titulo" x="61" y="0" width="428" height="29" uuid="bd675c9b-2f32-4e58-96ae-c82a36a7a709"/>
+				<text><![CDATA[Reporte de listas aprobadas por obra y día]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement style="Titulo" x="608" y="0" width="194" height="63" uuid="ca5945e7-5cb3-4a71-8961-125f7487d59f"/>
+			</rectangle>
+			<rectangle>
+				<reportElement style="Titulo" x="0" y="0" width="608" height="63" uuid="a41327c7-55b5-41aa-8267-68601135877c"/>
+			</rectangle>
+			<textField>
+				<reportElement x="608" y="0" width="135" height="20" uuid="daad3d14-9eb1-470d-8c05-748c1c360255"/>
+				<textFieldExpression><![CDATA[$P{jc}.equals( true )? " Todas las obras" : ("Obra: " + $P{obra_num})]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="0" y="0" width="61" height="63" uuid="d01a7148-8a2b-4f36-9b3e-129f1f1ef45c"/>
+				<imageExpression><![CDATA["Reportes/logo01.jpg"]]></imageExpression>
+			</image>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="14" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="13" width="239" height="1" uuid="84f700c7-f7f6-41e1-b812-d7cf676a5864"/>
+			</line>
+			<staticText>
+				<reportElement x="0" y="1" width="190" height="13" uuid="0382d05f-cbee-4632-a019-21dc42d00501"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Día]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="190" y="1" width="49" height="13" uuid="c5e872a8-2688-4f43-bd5d-553213eed1e7"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cantidad]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="23" splitType="Stretch">
+			<frame>
+				<reportElement style="Fila" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="0" width="802" height="23" uuid="9be1a4a6-45de-4b77-95ca-ae17517d3e66"/>
+				<textField isBlankWhenNull="true">
+					<reportElement style="Fila" positionType="Float" stretchType="RelativeToTallestObject" x="194" y="0" width="45" height="23" uuid="f4b15f5f-4be0-4fe3-aa56-504441978bed"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{cant}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement style="Fila" positionType="Float" stretchType="RelativeToTallestObject" x="5" y="0" width="185" height="23" uuid="5cfee666-de57-421c-aebc-33293329dd60"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{dia}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="24" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="20" splitType="Stretch">
+			<rectangle>
+				<reportElement x="0" y="0" width="802" height="20" uuid="1f1e18e4-787c-4fb2-82c2-08f6a4cf285e"/>
+			</rectangle>
+			<textField>
+				<reportElement x="682" y="0" width="80" height="20" uuid="0a2821b2-7275-4231-a674-fab11428a862"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Pag. "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="762" y="0" width="40" height="20" uuid="f6d5b7bb-85a0-4feb-8087-3b247c1ff3a4"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reportElementos" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="da303201-34d8-41a5-aad8-77d8e89ccc5e">
+	<property name="ireport.zoom" value="1.1"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<style name="Fila" fontName="Verdana" fontSize="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Header Header" mode="Transparent" forecolor="#000000" backcolor="#0000CC" fill="Solid" fontName="DejaVu Sans" fontSize="10" isBold="true"/>
+	<style name="Titulo" mode="Transparent" forecolor="#000000" backcolor="#000000" fontSize="22" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<parameter name="orden" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="filtroTipo" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="filtroArea" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[declare @tipo varchar(50);
+set @tipo = (select distinct Sistemas_Diseno.nombre from Sistemas_Diseno where Sistemas_Diseno.nombre=$P{filtroTipo})
+
+declare @area varchar(50);
+set @area = (select distinct Areas.descripcion from Areas where Areas.descripcion=$P{filtroArea})
+
+Select Elementos.codigo, Elementos.descripcion, Areas.descripcion as area,
+Sistemas_Diseno.nombre as sistema
+from (Elementos inner join Areas on Elementos.id_area=Areas.id_area)
+JOIN Sistemas_Diseno on Sistemas_Diseno.id_sistema=Elementos.id_sistema
+where Elementos.activado=1
+and (Sistemas_Diseno.nombre = @tipo or @tipo is null)
+and (Areas.descripcion = @area or @area is null)
+ORDER BY
+  CASE
+  WHEN $P{orden} = 1 THEN CAST(Areas.descripcion as varchar)+' '+CAST(Elementos.codigo AS varchar)
+  WHEN $P{orden} = 2 THEN CAST(Areas.descripcion as varchar)+' '+CAST(Sistemas_Diseno.nombre as varchar)+' '+CAST(Elementos.codigo AS varchar)
+  WHEN $P{orden} = 3 THEN CAST(Areas.descripcion as varchar)+' '+CAST(Elementos.descripcion as varchar)
+  ELSE CAST(Areas.descripcion as varchar)
+  END;]]>
+	</queryString>
+	<field name="codigo" class="java.lang.String"/>
+	<field name="descripcion" class="java.lang.String"/>
+	<field name="area" class="java.lang.String"/>
+	<field name="sistema" class="java.lang.String"/>
+	<group name="Area">
+		<groupExpression><![CDATA[$F{area}]]></groupExpression>
+		<groupHeader>
+			<band height="35">
+				<staticText>
+					<reportElement uuid="3194bd95-d011-4837-971f-e10bce3eb45b" style="Header Header" x="8" y="21" width="124" height="14"/>
+					<textElement/>
+					<text><![CDATA[Código]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="8e01a38c-47f1-4c39-b489-021d0484019b" style="Header Header" x="464" y="21" width="72" height="14"/>
+					<textElement/>
+					<text><![CDATA[Área]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="dd514fab-cb34-4355-9f13-12e902a234f9" style="Header Header" x="132" y="21" width="101" height="14"/>
+					<textElement/>
+					<text><![CDATA[Descripción]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="5c9b7615-a31b-4508-bd48-7711c4c11d4e" style="Header Header" x="316" y="21" width="108" height="14"/>
+					<textElement/>
+					<text><![CDATA[Sistema ]]></text>
+				</staticText>
+				<line>
+					<reportElement uuid="84f700c7-f7f6-41e1-b812-d7cf676a5864" x="0" y="33" width="555" height="1"/>
+				</line>
+				<textField>
+					<reportElement uuid="1d6485b1-7005-465a-9a0c-dd065bcc33ec" x="0" y="0" width="174" height="20"/>
+					<textElement>
+						<font size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Área: " + $F{area}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="15"/>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="63" splitType="Stretch">
+			<rectangle>
+				<reportElement uuid="ca5945e7-5cb3-4a71-8961-125f7487d59f" style="Titulo" x="361" y="0" width="194" height="63"/>
+			</rectangle>
+			<staticText>
+				<reportElement uuid="bd675c9b-2f32-4e58-96ae-c82a36a7a709" style="Titulo" x="63" y="0" width="234" height="29"/>
+				<textElement/>
+				<text><![CDATA[Reporte de elementos]]></text>
+			</staticText>
+			<image>
+				<reportElement uuid="bee4cc77-d452-4e11-877c-348e6a1ed140" x="0" y="0" width="63" height="63"/>
+				<imageExpression><![CDATA["Reportes\\logo01.jpg"]]></imageExpression>
+			</image>
+			<rectangle>
+				<reportElement uuid="a41327c7-55b5-41aa-8267-68601135877c" style="Titulo" x="0" y="0" width="361" height="63"/>
+			</rectangle>
+			<textField>
+				<reportElement uuid="3f51a80a-dfbd-4b0e-a627-46eee48404f4" x="368" y="9" width="183" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["Filtro de tipo: " + $P{filtroTipo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="68651646-96e6-4432-bb99-9fc101d274bf" x="368" y="29" width="183" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["Odenado por: " + (
+    $P{orden}.equals(1) ? "Código" :
+$P{orden}.equals(2)? "Tipo, código" :
+$P{orden}.equals(3)? "Peso específico" :
+$P{orden}.equals(4)? "Espesor" :
+$P{orden}.equals(5)? "Calidad, Materiales" : ""
+
+    )]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="18" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="14" splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<textField>
+				<reportElement uuid="76087e2d-a358-4987-a92e-061fbd055f24" x="8" y="0" width="124" height="15"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{codigo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="15404f60-adf6-4069-ab15-8c288be5e002" x="132" y="0" width="184" height="15"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="a4739a9c-d14c-4ab5-87a2-66adb9d79bcb" x="316" y="0" width="129" height="15"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{sistema}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="8abea78a-eb37-47b1-8eac-8e4bacdc8bc1" x="464" y="0" width="72" height="15"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{area}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="12" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="20" splitType="Stretch">
+			<textField evaluationTime="Report">
+				<reportElement uuid="f6d5b7bb-85a0-4feb-8087-3b247c1ff3a4" mode="Transparent" x="511" y="0" width="40" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="0a2821b2-7275-4231-a674-fab11428a862" x="431" y="0" width="80" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Pag. "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement uuid="1f1e18e4-787c-4fb2-82c2-08f6a4cf285e" mode="Transparent" x="0" y="0" width="555" height="20"/>
+			</rectangle>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

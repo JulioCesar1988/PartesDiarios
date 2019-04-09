@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report3" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="3272906e-090d-4509-96a5-358566bccc50">
+	<property name="ireport.zoom" value="1.771561000000001"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="18"/>
+	<queryString>
+		<![CDATA[select obras.numero			 as numeroObra ,
+       paquetes.numero		 as numeroPaquete,
+       piezas.id_pieza		 as IdPieza,
+       piezas.correlatividad as correlatividad,
+       piezas.elemento		 as elemento,
+       subpiezas.id_subpieza as idSubpieza,
+       tareas.codigo		 as codigoTarea ,
+       tareas.descripcion	 as descripcionTarea,
+       subpiezas_tareas.estado  as estadoTarea,
+        subpiezas_tareas.fecha_finalizado    as fechaFinalizado ,
+        piezas.descripcion as descripcionPieza,
+        subpiezas.elemento as elementoSubpieza,
+        subpiezas.correlatividad as correlatividadSubpieza,
+        subpiezas.codigo as codigoSubpiza
+
+
+from Obras inner join paquetes on (obras.id_obra = paquetes.id_obra)
+           inner join piezas on (piezas.id_paquete = paquetes.id_paquete)
+           inner join subpiezas on (piezas.id_pieza = subpiezas.id_pieza)
+           inner join subpiezas_tareas on (subpiezas_tareas.id_subpieza = subpiezas.id_subpieza)
+           inner join tareas  on (subpiezas_tareas.id_tarea = tareas.id_tarea)
+where obras.activado      = 1  and
+      paquetes.activado   = 1  and
+      piezas.activado     = 1  and
+      subpiezas.activado = 1 and
+      subpiezas_Tareas.activado = 1 and
+      tareas.activado =  1 and
+      obras.numero = 538 and
+      paquetes.numero = 16 and
+      piezas.correlatividad = '3' and piezas.elemento = 'VSOL'
+
+group by   obras.numero ,
+           paquetes.numero,
+           piezas.correlatividad,
+           piezas.elemento ,
+           subpiezas.id_subpieza,
+           piezas.id_pieza ,
+           tareas.codigo ,
+           tareas.descripcion,
+           subpiezas_tareas.estado,
+           subpiezas_tareas.fecha_finalizado ,
+           piezas.descripcion ,
+           subpiezas.elemento ,
+           subpiezas.correlatividad ,
+           subpiezas.codigo]]>
+	</queryString>
+	<field name="numeroObra" class="java.lang.Integer"/>
+	<field name="numeroPaquete" class="java.lang.Integer"/>
+	<field name="IdPieza" class="java.lang.Integer"/>
+	<field name="correlatividad" class="java.lang.String"/>
+	<field name="elemento" class="java.lang.String"/>
+	<field name="idSubpieza" class="java.lang.Integer"/>
+	<field name="codigoTarea" class="java.lang.String"/>
+	<field name="descripcionTarea" class="java.lang.String"/>
+	<field name="estadoTarea" class="java.lang.String"/>
+	<field name="fechaFinalizado" class="java.sql.Timestamp"/>
+	<field name="descripcionPieza" class="java.lang.String"/>
+	<field name="elementoSubpieza" class="java.lang.String"/>
+	<field name="correlatividadSubpieza" class="java.lang.String"/>
+	<field name="codigoSubpiza" class="java.lang.Integer"/>
+	<variable name="numeroObra_1" class="java.lang.Integer" resetType="Page" calculation="Sum">
+		<variableExpression><![CDATA[$F{numeroObra}]]></variableExpression>
+	</variable>
+	<variable name="codigoTarea_1" class="java.lang.Integer" resetType="Group" resetGroup="subpieza" calculation="DistinctCount">
+		<variableExpression><![CDATA[$F{codigoTarea}]]></variableExpression>
+	</variable>
+	<variable name="IdPieza_1" class="java.lang.Integer" resetType="Group" resetGroup="Pieza" calculation="Count">
+		<variableExpression><![CDATA[$F{IdPieza}]]></variableExpression>
+	</variable>
+	<variable name="idSubpieza_1" class="java.lang.Integer" resetType="Group" resetGroup="Pieza" calculation="Count">
+		<variableExpression><![CDATA[$F{idSubpieza}]]></variableExpression>
+	</variable>
+	<group name="Pieza">
+		<groupExpression><![CDATA[$F{IdPieza}]]></groupExpression>
+		<groupHeader>
+			<band height="23">
+				<staticText>
+					<reportElement x="0" y="3" width="32" height="20" uuid="5ccf5fd5-3be7-43f7-87b9-681758f9c220"/>
+					<textElement verticalAlignment="Bottom">
+						<font isItalic="true"/>
+					</textElement>
+					<text><![CDATA[Pieza]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="32" y="3" width="100" height="20" forecolor="#000000" uuid="d78bbf47-9c77-42e0-ac42-726cdf40722f"/>
+					<textElement verticalAlignment="Bottom">
+						<font isBold="true" isUnderline="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{descripcionPieza}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="132" y="3" width="171" height="20" uuid="9b05db11-51da-4585-8518-293f216eb4ab"/>
+					<textElement verticalAlignment="Bottom"/>
+					<textFieldExpression><![CDATA[$F{elemento} +" " +$F{correlatividad}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="50"/>
+		</groupFooter>
+	</group>
+	<group name="subpieza">
+		<groupExpression><![CDATA[$F{idSubpieza}]]></groupExpression>
+		<groupHeader>
+			<band height="23">
+				<staticText>
+					<reportElement x="0" y="0" width="100" height="23" forecolor="#000000" backcolor="#C0C0C0" uuid="93e7942e-17c0-4a2f-b984-55cbd4afd5ab"/>
+					<textElement verticalAlignment="Bottom">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Subpieza]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="232" y="0" width="113" height="23" uuid="2844da88-86de-42d1-bf42-93dc8f216f53"/>
+					<textElement verticalAlignment="Bottom">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{elementoSubpieza}+" "+$F{correlatividadSubpieza}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="200" y="0" width="32" height="23" uuid="6b7f78c7-1162-41be-8cf2-9a3dd3e91392"/>
+					<textElement verticalAlignment="Bottom">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[POS]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="494" y="0" width="61" height="23" uuid="5d7e1860-1dfb-411c-a1cd-0bf13602ee90"/>
+					<textElement verticalAlignment="Bottom">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{codigoSubpiza}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="435" y="0" width="59" height="23" uuid="209bcecb-91ed-45f7-a0c8-c0b6decb7cbb"/>
+					<textElement verticalAlignment="Bottom">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[CODIGO]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="345" y="0" width="46" height="23" uuid="9227c25d-58fc-4dae-8d02-170467a224c9"/>
+					<textElement verticalAlignment="Bottom">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[ESTADO]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="12"/>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<rectangle>
+				<reportElement x="0" y="0" width="555" height="79" uuid="a48fcd59-ce05-431c-9c32-e5ecd374733f"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="0" y="0" width="364" height="59" uuid="ab9b6767-f05b-47e9-8a3e-57a924732263"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="24" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Tareas realizadas a piezas]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="59" width="364" height="20" uuid="bac3982b-5ea9-4f14-8514-d218d52d83bc"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[master de tareas a subpiezas  , estados.]]></text>
+			</staticText>
+			<image>
+				<reportElement x="364" y="10" width="191" height="69" uuid="8543d53d-e762-4015-b2d3-b70d7ecc97a6"/>
+				<imageExpression><![CDATA["C:\\Users\\jcontreras\\Desktop\\Proyecto Pintura\\ReportPintura\\Reportes\\logo01.jpg"]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="24" splitType="Stretch">
+			<rectangle>
+				<reportElement x="0" y="0" width="555" height="24" backcolor="#FFFFFF" uuid="ce39a8e6-fc13-445d-bfa3-37e7390a5580"/>
+			</rectangle>
+			<textField>
+				<reportElement x="159" y="4" width="100" height="20" uuid="d01eb317-5112-40e2-8e94-ec82d92a8719"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numeroPaquete}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="127" y="4" width="32" height="20" uuid="caafeccd-c96a-437b-b964-a6e86e476a9b"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Paq.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="4" width="32" height="20" uuid="3f218e79-2de2-4e86-9220-a74f554e23b9"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Obra ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="32" y="4" width="95" height="20" uuid="505290f0-f4cd-4400-ad00-d29e25cdfcd8"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numeroObra}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="21" splitType="Stretch">
+			<textField>
+				<reportElement x="100" y="1" width="100" height="20" uuid="7b5c12b3-f419-4bc7-83e3-4540cfb7c19d"/>
+				<textElement verticalAlignment="Bottom"/>
+				<textFieldExpression><![CDATA[$F{codigoTarea}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="200" y="1" width="164" height="20" uuid="82e2fe4f-4c62-48d6-aa16-238103880dce"/>
+				<textElement verticalAlignment="Bottom"/>
+				<textFieldExpression><![CDATA[$F{descripcionTarea}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="364" y="1" width="71" height="20" uuid="2e5db2ad-9401-4ade-beec-8def0071a9c9"/>
+				<textElement verticalAlignment="Bottom"/>
+				<textFieldExpression><![CDATA[$F{estadoTarea}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="435" y="0" width="79" height="20" uuid="560ad145-e3e3-4c3d-9706-4c1280d5aa5f"/>
+				<textElement verticalAlignment="Bottom"/>
+				<textFieldExpression><![CDATA[$F{fechaFinalizado}.equals(null)?"sin fecha":$F{fechaFinalizado}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="1" width="100" height="20" uuid="35467c15-f9f7-4094-96db-164c52680195"/>
+				<textElement verticalAlignment="Bottom"/>
+				<text><![CDATA[Tarea]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="1" width="555" height="1" uuid="2c45a677-c328-4328-8e32-e0680cb37ddf"/>
+			</line>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

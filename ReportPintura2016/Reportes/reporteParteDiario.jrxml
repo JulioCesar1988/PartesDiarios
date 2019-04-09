@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteParteDiario" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="BlankPage" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="39ce6051-54f5-4e46-a309-e31c1d802cd7">
+	<property name="ireport.zoom" value="1.6105100000000145"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="SubTitle" forecolor="#736343" fontName="Arial" fontSize="18"/>
+	<style name="Column header" forecolor="#666666" fontSize="10" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Detail" fontName="Arial" fontSize="12"/>
+	<style name="Row" mode="Transparent">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+			<style backcolor="#0000CC"/>
+		</conditionalStyle>
+	</style>
+	<style name="Encabezado de columnas" forecolor="#666666" isBlankWhenNull="true" fontSize="10" isBold="true" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<style name="Tabla de control" vAlign="Middle" fontSize="8"/>
+	<style name="Tabla de control Datos" vAlign="Middle" fontSize="7" isItalic="true"/>
+	<style name="Title" fontName="Times New Roman" fontSize="30" isBold="true" pdfFontName="Times-Bold"/>
+	<style name="style1"/>
+	<style name="Column header estatico" forecolor="#000000" fontName="SansSerif" fontSize="10" isBold="true" isItalic="true"/>
+	<parameter name="desde" class="java.lang.String"/>
+	<parameter name="hasta" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select
+Empresas.nombre as empresaNombre, Empleados.legajo, Empleados.apellido+', '+ Empleados.nombre as empleado,
+Parte_Diario_Tarea.fecha, Parte_Diario_Tarea.hora_inicio, Parte_Diario_Tarea.hora_fin,
+Tareas.codigo as tareaCodigo, Tareas.descripcion as tareaNombre, Tareas.descripcion_extra as tareaDescripcion,
+Sectores.nombre as sectorNombre, Obras.numero as obraNumero, Obras.nombre as obraNombre
+
+from Parte_Diario_Tarea
+inner join (Empleados inner join Empresas on Empleados.id_empresa=Empresas.id_empresa)
+on empleados.id_empleado=Parte_Diario_Tarea.id_empleado
+inner join (Tareas inner join Sectores on sectores.id_sector=Tareas.id_sector)
+on Tareas.id_tarea = Parte_Diario_Tarea.id_tarea
+inner join Obras
+on Parte_Diario_Tarea.id_obra=Obras.id_obra
+
+where Parte_Diario_Tarea.activado=1
+and Parte_Diario_Tarea.fecha between $P{desde} and $P{hasta}]]>
+	</queryString>
+	<field name="empresaNombre" class="java.lang.String"/>
+	<field name="legajo" class="java.lang.Integer"/>
+	<field name="empleado" class="java.lang.String"/>
+	<field name="fecha" class="java.util.Date"/>
+	<field name="hora_inicio" class="java.sql.Time"/>
+	<field name="hora_fin" class="java.sql.Time"/>
+	<field name="tareaCodigo" class="java.lang.String"/>
+	<field name="tareaNombre" class="java.lang.String"/>
+	<field name="tareaDescripcion" class="java.lang.String"/>
+	<field name="sectorNombre" class="java.lang.String"/>
+	<field name="obraNumero" class="java.lang.Integer"/>
+	<field name="obraNombre" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="66">
+			<rectangle>
+				<reportElement mode="Transparent" x="529" y="0" width="273" height="61" uuid="619a07ee-958b-4096-ad0e-35ecd14a44d9"/>
+			</rectangle>
+			<rectangle>
+				<reportElement mode="Transparent" x="0" y="0" width="529" height="61" forecolor="#000000" backcolor="#FFFFFF" uuid="3f16cbcc-8080-49ce-9761-9a82c7b9db58"/>
+			</rectangle>
+			<image>
+				<reportElement x="1" y="1" width="67" height="59" uuid="fdaef181-d1c5-454a-b55d-91ba49f7c300"/>
+				<imageExpression><![CDATA["Reportes/logo01.jpg"]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement style="Column header estatico" x="550" y="12" width="37" height="15" forecolor="#333333" backcolor="#FFFFFF" uuid="a9b6dc72-50cf-4178-823e-e4ed57d1d6ad"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Desde:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header estatico" x="550" y="27" width="37" height="15" forecolor="#333333" backcolor="#FFFFFF" uuid="76039f73-b154-4a76-a2aa-c5b6150470d2"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Hasta:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="587" y="12" width="100" height="15" uuid="7f330979-ab1c-41fb-8bac-2a3e20f7c997"/>
+				<textFieldExpression><![CDATA[$P{desde}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="587" y="27" width="100" height="15" uuid="1055f66e-9ec4-4ef5-b4fe-c6d20ef15f3d"/>
+				<textFieldExpression><![CDATA[$P{hasta}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="68" y="1" width="346" height="29" forecolor="#333333" uuid="747ef664-f296-4d16-9a66-4c7b5de894c2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="22" isItalic="true" pdfFontName="Times-Roman"/>
+				</textElement>
+				<text><![CDATA[Parte Diario de Tareas]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="14">
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="0" y="13" width="802" height="1" uuid="0491f135-8452-4d97-b30a-7cba1b085fbd"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#999999"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="36" y="0" width="29" height="14" forecolor="#000066" uuid="91847446-0eae-462a-b099-5bfc7769ce31"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Legajo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="271" y="0" width="37" height="14" forecolor="#000066" uuid="50457594-4eb0-4343-98ce-29b72f274753"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Fin]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="237" y="0" width="34" height="14" forecolor="#000066" uuid="dad9abbd-22e0-426b-9eb6-21ee8bcc74fe"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Inicio]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="355" y="0" width="132" height="14" forecolor="#000066" uuid="afe75542-fbdb-42e2-8b73-d977fbee080a"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Tarea]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="310" y="0" width="45" height="14" forecolor="#000066" uuid="3ee74d5c-fc02-4a1a-a99a-b017dc091a39"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Código]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="573" y="0" width="61" height="14" forecolor="#000066" uuid="8c5bfa03-4f4f-4f28-880f-b02e96cd9304"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Sector]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="178" y="0" width="59" height="14" forecolor="#000066" uuid="ef4cda94-318a-4bd1-8876-6c78fbecfce3"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Fecha]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="634" y="0" width="29" height="14" forecolor="#000066" uuid="6c464279-419d-4492-9eaa-3cab809e6b9b"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Obra ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="36" height="14" forecolor="#000066" uuid="18cc77f6-b61b-426d-a7b3-62b653ebc4c4"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Empresa]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="663" y="0" width="139" height="14" forecolor="#000066" uuid="2301f6a5-2fab-4756-975f-5bd81af3db6f"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Obra Nombre]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="487" y="0" width="86" height="14" forecolor="#000066" uuid="42913888-6b29-4425-906d-0b2f262e3da1"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Descripción]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="65" y="0" width="99" height="14" forecolor="#000066" uuid="e111959f-5770-4819-bcca-642fc360d9e5"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Empleado]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="11" splitType="Stretch">
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy">
+				<reportElement x="178" y="0" width="59" height="11" uuid="0259b59b-a43d-4adf-a0ee-3cc7aefba13b"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fecha}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="HH:mm">
+				<reportElement x="237" y="0" width="34" height="11" uuid="23d5b09f-be71-4c6e-b271-747009ae35e2"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{hora_inicio}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="HH:mm">
+				<reportElement x="271" y="0" width="37" height="11" uuid="e4b6bb85-217b-487f-a78b-acca2664eaab"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{hora_fin}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="355" y="0" width="132" height="11" uuid="585bc1d0-89e2-4140-8da3-15b48f456b8a"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tareaNombre}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="310" y="0" width="45" height="11" uuid="e246e6da-d050-4ea5-a1f3-16e23ceb1655"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tareaCodigo}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="573" y="0" width="61" height="11" uuid="97d41f86-082f-42e7-92b8-45abefb6c557"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{sectorNombre}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="0" width="36" height="11" uuid="af6bb074-d7ef-4eeb-ae97-09007811f260"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{empresaNombre}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="36" y="0" width="29" height="11" uuid="48b13f7e-91ef-48c3-a099-0eeae7c25120"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{legajo}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="65" y="0" width="99" height="11" uuid="53b6b94d-017f-444b-953a-8ee3b1f3db36"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{empleado}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="663" y="0" width="139" height="11" uuid="3f144417-b3b5-4d0b-8d98-49a4a84bd7f6"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{obraNombre}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="634" y="0" width="29" height="11" uuid="4b46915d-dd36-4ca9-a465-dbb905d0d9c4"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{obraNumero}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="487" y="0" width="86" height="11" uuid="8a9bc9bc-54a0-4d10-bdf2-ea318c02c492"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tareaDescripcion}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="20">
+			<textField evaluationTime="Report">
+				<reportElement x="737" y="0" width="40" height="20" uuid="d793caf9-fbbf-4d3d-9307-9e83c858e5dd"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="681" y="0" width="96" height="20" uuid="ff29bdd5-4385-4982-b45e-32d4f95cd539"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Pag. "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement x="0" y="0" width="802" height="20" uuid="38c1b3ba-db08-404e-a74b-a48673ea44a7"/>
+			</rectangle>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement style="Column header" x="8" y="0" width="197" height="20" forecolor="#000000" uuid="00271136-84a5-4a5e-a13f-dc3d74af4a02"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="10" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="681" y="0" width="80" height="20" uuid="087469ae-b2d1-41ba-8383-3fd45c3eda38"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Times New Roman" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Pag. "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="761" y="0" width="40" height="20" uuid="520cb44f-aa70-457e-bbce-738981904f42"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

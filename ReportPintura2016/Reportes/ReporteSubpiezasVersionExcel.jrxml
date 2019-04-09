@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report2" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a8b6d877-1445-458e-8be1-30e4990e0e8f">
+	<property name="ireport.zoom" value="1.1000000000000023"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="SubTitle" forecolor="#736343" fontName="Arial" fontSize="18"/>
+	<style name="Column header" forecolor="#666666" fontSize="10" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Detail" fontName="Arial" fontSize="12"/>
+	<style name="Row" mode="Transparent">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+			<style backcolor="#0000CC"/>
+		</conditionalStyle>
+	</style>
+	<style name="Encabezado de columnas" forecolor="#666666" isBlankWhenNull="true" fontSize="10" isBold="true" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<style name="Tabla de control" vAlign="Middle" fontSize="8"/>
+	<style name="Tabla de control Datos" vAlign="Middle" fontSize="7" isItalic="true"/>
+	<style name="Title" fontName="Times New Roman" fontSize="30" isBold="true" pdfFontName="Times-Bold"/>
+	<style name="style1"/>
+	<style name="Column header estatico" forecolor="#000000" fontName="SansSerif" fontSize="10" isBold="true" isItalic="true"/>
+	<parameter name="obra_num" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="paquete_num" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[declare @obra_num int
+declare @paquete_num int
+
+set @obra_num = $P{obra_num}
+set @paquete_num = $P{paquete_num}
+
+
+SELECT
+   count (Subpiezas.elemento + cast(Subpiezas.correlatividad as varchar)) as Cantidad,
+     Subpiezas."elemento" AS Subpiezas_elemento,
+     Subpiezas."correlatividad" AS Subpiezas_correlatividad,
+     Subpiezas."descripcion" AS Subpiezas_descripcion,
+     Subpiezas."ancho" AS Subpiezas_ancho,
+     Subpiezas."largo" AS Subpiezas_largo,
+     Subpiezas."peso" AS Subpiezas_peso,
+     Subpiezas."observaciones" AS Subpiezas_observaciones,
+     Materiales."codigo" AS Materiales_codigo,
+     Materiales."tipo" AS Materiales_tipo,
+     Materiales."peso_especifico" AS Materiales_peso_especifico,
+     Materiales."espesor" AS Materiales_espesor,
+     Materiales."calidad" AS Materiales_calidad,
+
+     Obras."numero" AS Obras_numero,
+     Obras."nombre" AS Obras_nombre,
+     Obras."direccion" AS Obras_direccion,
+     Obras."localidad" AS Obras_localidad,
+     Obras."provincia" AS Obras_provincia,
+     Edificio."nombre" AS Edificio_nombre,
+     Paquetes."numero" AS Paquetes_numero,
+     Paquetes."numero_revision" AS Paquetes_numero_revision,
+     Paquetes."descripcion" AS Paquetes_descripcion,
+     Paquetes."fecha_fabricacion" AS Paquetes_fecha_fabricacion,
+     Paquetes."fecha_despacho" AS Paquetes_fecha_despacho,
+
+     AuxCreado.empleadoCreado,
+     cast (AuxCreado.fechaCreado as smalldatetime) as fechaCreado,
+     CONVERT(varchar(11), AuxCreado.fechaCreado, 103) AS fechaCreado2,
+     AuxRevisado.empleadoRevisado,
+     cast (AuxRevisado.fechaRevisado as smalldatetime) as fechaRevisado,
+     AuxAprovado.empleadoAprovado,
+     cast (AuxAprovado.fechaAprovado as smalldatetime) as fechaAprovado,
+     AuxAprovadoProd.empleadoAprovadoProd,
+     cast (AuxAprovadoProd.fechaAprovadoProd as smalldatetime) as fechaAprovadoProd,
+     AuxEnviado.empleadoEnviado,
+     cast (AuxEnviado.fechaEnviado as smalldatetime) as fechaEnviado
+
+FROM
+     "dbo"."Obras" Obras INNER JOIN "dbo"."Edificio" Edificio ON Obras."id_obra" = Edificio."id_obra"
+     INNER JOIN "dbo"."Paquetes" Paquetes ON Edificio."id_edificio" = Paquetes."id_edificio"
+     AND Obras."id_obra" = Paquetes."id_obra"
+     INNER JOIN "dbo"."Piezas" Piezas ON Paquetes."id_paquete" = Piezas."id_paquete"
+
+    Inner join Subpiezas on Subpiezas.id_pieza=Piezas.id_pieza
+
+    INNER JOIN Materiales ON Materiales."id_material" = Subpiezas."id_material"
+
+	left JOIN (select top 1 (Empleados.apellido+ ', ' + Empleados.nombre) as empleadoCreado,
+				 Paquete_Empleado_Creado.id_paquete,Paquete_Empleado_Creado.fecha as fechaCreado, Paquetes.numero
+				 from Paquete_Empleado_Creado
+				 inner join Empleados
+				 on Paquete_Empleado_Creado.id_empleado=Empleados.id_empleado
+				 inner join Paquetes on Paquetes.id_paquete=Paquete_Empleado_Creado.id_paquete
+				 inner join Obras on Paquetes.id_obra=Obras.id_obra
+				 where obras.numero= @obra_num
+				 and Paquetes.numero=@paquete_num
+				 order by fechaCreado desc)
+		 As AuxCreado on AuxCreado.numero=Paquetes.numero
+
+	left JOIN (select top 1 (Empleados.apellido+ ', ' + Empleados.nombre) as empleadoRevisado,
+				 Paquete_Empleado_Revizado.id_paquete,Paquete_Empleado_Revizado.fecha as fechaRevisado, Paquetes.numero
+				 from Paquete_Empleado_Revizado
+				 inner join Empleados
+				 on Paquete_Empleado_Revizado.id_empleado=Empleados.id_empleado
+				 inner join Paquetes on Paquetes.id_paquete=Paquete_Empleado_Revizado.id_paquete
+				 inner join Obras on Paquetes.id_obra=Obras.id_obra
+				 where obras.numero= @obra_num
+				 and Paquetes.numero=@paquete_num
+				 order by fechaRevisado desc)
+		 As AuxRevisado on AuxRevisado.numero=Paquetes.numero
+
+	left JOIN (select top 1 (Empleados.apellido+ ', ' + Empleados.nombre) as empleadoAprovado,
+				 Paquete_Empleado_Aprobado.id_paquete,Paquete_Empleado_Aprobado.fecha as fechaAprovado, Paquetes.numero
+				 from Paquete_Empleado_Aprobado
+				 inner join Empleados
+				 on Paquete_Empleado_Aprobado.id_empleado=Empleados.id_empleado
+				 inner join Paquetes on Paquetes.id_paquete=Paquete_Empleado_Aprobado.id_paquete
+				 inner join Obras on Paquetes.id_obra=Obras.id_obra
+				 where obras.numero= @obra_num
+				 and Paquetes.numero=@paquete_num
+				 order by fechaAprovado desc)
+		 As AuxAprovado on AuxAprovado.numero=Paquetes.numero
+
+	left JOIN (select top 1 (Empleados.apellido+ ', ' + Empleados.nombre) as empleadoAprovadoProd,
+				 Paquete_Empleado_Aprobado_Produccion.id_paquete,Paquete_Empleado_Aprobado_Produccion.fecha as fechaAprovadoProd, Paquetes.numero
+				 from Paquete_Empleado_Aprobado_Produccion
+				 inner join Empleados
+				 on Paquete_Empleado_Aprobado_Produccion.id_empleado=Empleados.id_empleado
+				 inner join Paquetes on Paquetes.id_paquete=Paquete_Empleado_Aprobado_Produccion.id_paquete
+				 inner join Obras on Paquetes.id_obra=Obras.id_obra
+				 where obras.numero= @obra_num
+				 and Paquetes.numero=@paquete_num
+				 order by fechaAprovadoProd desc)
+		 As AuxAprovadoProd on AuxAprovadoProd.numero=Paquetes.numero
+
+	left JOIN (select top 1 (Empleados.apellido+ ', ' + Empleados.nombre) as empleadoEnviado,
+				 Paquete_Empleado_Enviado.id_paquete,Paquete_Empleado_Enviado.fecha as fechaEnviado, Paquetes.numero
+				 from Paquete_Empleado_Enviado
+				 inner join Empleados
+				 on Paquete_Empleado_Enviado.id_empleado=Empleados.id_empleado
+				 inner join Paquetes on Paquetes.id_paquete=Paquete_Empleado_Enviado.id_paquete
+				 inner join Obras on Paquetes.id_obra=Obras.id_obra
+				 where obras.numero= @obra_num
+				 and Paquetes.numero= @paquete_num
+				 order by fechaEnviado desc)
+		 As AuxEnviado on AuxAprovadoProd.numero=Paquetes.numero
+
+
+WHERE
+     Obras.activado = 1
+     and Paquetes.activado = 1
+     and Edificio.activado = 1
+     and Piezas.activado = 1
+     and obras.numero= @obra_num
+	 and Paquetes.numero= @paquete_num
+     and Piezas.area <> 'warehouse'
+
+GROUP BY
+     Obras."numero",
+     Obras."nombre",
+     Obras."direccion",
+     Obras."localidad",
+     Obras."provincia",
+     Edificio."nombre",
+     Paquetes."numero",
+     Paquetes."numero_revision",
+     Paquetes."descripcion",
+     Paquetes."fecha_fabricacion",
+     Paquetes."fecha_despacho",
+
+
+     AuxCreado.empleadoCreado,
+     AuxCreado.fechaCreado,
+     AuxRevisado.empleadoRevisado,
+     AuxRevisado.fechaRevisado,
+     AuxAprovado.empleadoAprovado,
+     AuxAprovado.fechaAprovado,
+     AuxAprovadoProd.empleadoAprovadoProd,
+     AuxAprovadoProd.fechaAprovadoProd,
+     AuxEnviado.empleadoEnviado,
+     AuxEnviado.fechaEnviado,
+
+     Subpiezas."elemento" ,
+     Subpiezas."correlatividad" ,
+     Subpiezas."descripcion" ,
+     Subpiezas."ancho" ,
+     Subpiezas."largo" ,
+     Subpiezas."peso" ,
+     Subpiezas."observaciones" ,
+     Materiales."codigo" ,
+     Materiales."tipo" ,
+     Materiales."peso_especifico" ,
+     Materiales."espesor" ,
+     Materiales."calidad"
+
+Order by Subpiezas.elemento, Subpiezas.correlatividad]]>
+	</queryString>
+	<field name="Cantidad" class="java.lang.Integer"/>
+	<field name="Subpiezas_elemento" class="java.lang.String"/>
+	<field name="Subpiezas_correlatividad" class="java.lang.String"/>
+	<field name="Subpiezas_descripcion" class="java.lang.String"/>
+	<field name="Subpiezas_ancho" class="java.lang.Integer"/>
+	<field name="Subpiezas_largo" class="java.math.BigDecimal"/>
+	<field name="Subpiezas_peso" class="java.math.BigDecimal"/>
+	<field name="Subpiezas_observaciones" class="java.lang.String"/>
+	<field name="Materiales_codigo" class="java.lang.String"/>
+	<field name="Materiales_tipo" class="java.lang.String"/>
+	<field name="Materiales_peso_especifico" class="java.math.BigDecimal"/>
+	<field name="Materiales_espesor" class="java.math.BigDecimal"/>
+	<field name="Materiales_calidad" class="java.lang.String"/>
+	<field name="Obras_numero" class="java.lang.Integer"/>
+	<field name="Obras_nombre" class="java.lang.String"/>
+	<field name="Obras_direccion" class="java.lang.String"/>
+	<field name="Obras_localidad" class="java.lang.String"/>
+	<field name="Obras_provincia" class="java.lang.String"/>
+	<field name="Edificio_nombre" class="java.lang.String"/>
+	<field name="Paquetes_numero" class="java.lang.Integer"/>
+	<field name="Paquetes_numero_revision" class="java.lang.Integer"/>
+	<field name="Paquetes_descripcion" class="java.lang.String"/>
+	<field name="Paquetes_fecha_fabricacion" class="java.lang.String"/>
+	<field name="Paquetes_fecha_despacho" class="java.lang.String"/>
+	<field name="empleadoCreado" class="java.lang.String"/>
+	<field name="fechaCreado" class="java.sql.Timestamp"/>
+	<field name="fechaCreado2" class="java.lang.String"/>
+	<field name="empleadoRevisado" class="java.lang.String"/>
+	<field name="fechaRevisado" class="java.sql.Timestamp"/>
+	<field name="empleadoAprovado" class="java.lang.String"/>
+	<field name="fechaAprovado" class="java.sql.Timestamp"/>
+	<field name="empleadoAprovadoProd" class="java.lang.String"/>
+	<field name="fechaAprovadoProd" class="java.sql.Timestamp"/>
+	<field name="empleadoEnviado" class="java.lang.String"/>
+	<field name="fechaEnviado" class="java.sql.Timestamp"/>
+	<variable name="sumaPeso" class="java.lang.Float" calculation="Sum">
+		<variableExpression><![CDATA[$F{Cantidad}*$F{Subpiezas_peso}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="14" splitType="Stretch">
+			<rectangle>
+				<reportElement uuid="3bd630a8-9f1b-4e34-82dc-937f61f20aac" x="0" y="0" width="802" height="14"/>
+			</rectangle>
+			<staticText>
+				<reportElement uuid="2e7a0868-a4ed-4afb-99d4-3261e26517b8" style="Encabezado de columnas" mode="Transparent" x="30" y="0" width="64" height="14"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Pos.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="37ea1d2e-e0e3-4d80-8a44-f829eaa142ce" style="Encabezado de columnas" mode="Transparent" x="561" y="0" width="65" height="14"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Peso unit]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="233ab962-6f82-4ac2-a00b-ca9b66881ff2" style="Encabezado de columnas" mode="Transparent" x="94" y="0" width="133" height="14"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Descripción]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="26189cc6-834a-4e25-a0c8-3c1a2f8d2eb8" style="Encabezado de columnas" mode="Transparent" x="415" y="0" width="51" height="14"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Espesor]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ab4fd9e1-2a4e-410b-b83c-e1a329f21b00" style="Encabezado de columnas" mode="Transparent" x="0" y="0" width="30" height="14"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Cant.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="18676e67-5906-4401-a743-d6ef22dfd69f" style="Encabezado de columnas" mode="Transparent" x="466" y="0" width="44" height="14"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Calidad]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="cc5f39d0-c8d4-4d85-9942-4842f3b08f23" style="Encabezado de columnas" mode="Transparent" x="683" y="0" width="110" height="14"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Observaciones]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ed4c85f8-38b5-426f-964f-cde891236127" style="Encabezado de columnas" mode="Transparent" x="340" y="0" width="75" height="14"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Tipo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="37ea1d2e-e0e3-4d80-8a44-f829eaa142ce" style="Encabezado de columnas" mode="Transparent" x="510" y="0" width="51" height="14"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Largo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ed4c85f8-38b5-426f-964f-cde891236127" style="Encabezado de columnas" mode="Transparent" x="227" y="0" width="113" height="14"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Material]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="bb5e17d0-fdc2-4dd9-86f8-29ceac65e664" style="Encabezado de columnas" mode="Transparent" x="626" y="0" width="57" height="14"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Peso total]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<textField>
+				<reportElement uuid="fcd624cf-722c-4869-ba2c-4420d2e7ba13" style="Row" mode="Transparent" x="415" y="0" width="51" height="12"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Materiales_espesor}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="445119e6-ab38-445b-ac96-3acc7cb3b6d9" style="Row" mode="Transparent" x="683" y="0" width="110" height="12"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Subpiezas_observaciones}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="756566da-8361-415f-8676-8af1900ad4b1" style="Row" mode="Transparent" x="340" y="0" width="75" height="12"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Materiales_tipo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="8c58ada7-c8e2-4e72-8071-5919d50309dc" style="Row" mode="Transparent" x="510" y="0" width="51" height="12"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Subpiezas_largo}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.0000;-###0.0000">
+				<reportElement uuid="d83a5175-7b48-4710-9ad8-c9c31cbb7ee6" style="Row" mode="Transparent" x="561" y="0" width="65" height="12"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Subpiezas_peso}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="5f5c8176-9935-4d77-8f8b-d83df620e485" style="Row" mode="Transparent" x="0" y="0" width="30" height="12"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Cantidad}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="3b834ed2-260b-49ac-8234-9226d82b1dcd" style="Row" mode="Transparent" x="30" y="0" width="64" height="12"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Subpiezas_elemento}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="cfc73971-f821-4f07-ae07-7a9f4c96de1e" style="Row" mode="Transparent" x="94" y="0" width="133" height="12"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Subpiezas_descripcion}.equals( null )? "" : $F{Subpiezas_descripcion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="764ec753-3ef8-40c4-a3d1-cca0004f1473" style="Row" mode="Transparent" x="466" y="0" width="44" height="12"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Materiales_calidad}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="756566da-8361-415f-8676-8af1900ad4b1" style="Row" mode="Transparent" x="227" y="0" width="113" height="12"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Materiales_codigo}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.0000;-###0.0000">
+				<reportElement uuid="dba098f6-82db-44cc-be01-1e45f5af5fed" style="Row" mode="Transparent" x="626" y="0" width="57" height="12"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Subpiezas_peso}*$F{Cantidad}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

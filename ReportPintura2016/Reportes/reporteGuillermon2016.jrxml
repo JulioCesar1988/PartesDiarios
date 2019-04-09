@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteGuillermon2016" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e2fa0c28-cb5b-4da4-b192-0fc79515a36d">
+	<property name="ireport.zoom" value="1.6105100000000008"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<queryString>
+		<![CDATA[select obras.numero as Obras_numero,
+ obras.nombre as Obras_nombre,
+  Paquetes.fecha_fabricacion,
+   cast(Paquetes.numero as varchar(10)) as Paquete,
+(Piezas.elemento  + '-'+ cast(Piezas.correlatividad as varchar(20))) as Pieza,
+(Subpiezas.elemento + cast(Subpiezas.correlatividad as varchar(20))) as Subpieza,
+Tareas.descripcion,
+(Materiales.tipo + ' - ' + cast(Materiales.espesor as varchar(20))) as Materiales,
+Tareas.id_tarea,
+Subpiezas.codigo,
+count(Subpiezas.codigo) as cantidad,
+sectores.nombre as nom_sector,
+CONVERT(varchar(11), getdate(), 103) as fecha_actual
+,SUBPIEZAS.PESO AS PESO_SUBPIEZA ,tareas.codigo as codigoTarea
+
+
+from (Obras inner join
+(Paquetes inner join
+(Piezas inner join
+(Subpiezas inner join
+(Subpiezas_Tareas inner join
+(Tareas inner join Sectores
+on Tareas.id_sector = Sectores.id_sector and Sectores.nombre= 'Primarios')
+on Subpiezas_Tareas.id_tarea = Tareas.id_tarea)
+on Subpiezas_Tareas.id_subpieza = Subpiezas.id_subpieza and Subpiezas_Tareas.estado = 'pendiente')
+on Subpiezas.id_pieza = Piezas.id_pieza)
+on Piezas.id_paquete = Paquetes.id_paquete)
+on Paquetes.id_obra = Obras.id_obra and Obras.numero = 538) inner join Materiales on Materiales.id_material=Subpiezas.id_material
+where Subpiezas_Tareas.activado = 1
+group by obras.numero, obras.nombre,
+         Paquetes.fecha_fabricacion,
+         Paquetes.numero,
+         Paquetes.numero_revision,
+         Piezas.elemento,
+         Piezas.correlatividad,
+         Subpiezas.elemento,
+         Subpiezas.correlatividad,
+         Tareas.descripcion,
+         Tareas.descripcion_extra,
+         Materiales.tipo,
+         Materiales.espesor,
+         Tareas.id_tarea,
+         Subpiezas.codigo,
+         sectores.nombre ,SUBPIEZAS.PESO ,
+         tareas.codigo
+
+order by Paquetes.fecha_fabricacion, Paquete, Pieza]]>
+	</queryString>
+	<field name="Obras_numero" class="java.lang.Integer"/>
+	<field name="Obras_nombre" class="java.lang.String"/>
+	<field name="fecha_fabricacion" class="java.lang.String"/>
+	<field name="Paquete" class="java.lang.String"/>
+	<field name="Pieza" class="java.lang.String"/>
+	<field name="Subpieza" class="java.lang.String"/>
+	<field name="descripcion" class="java.lang.String"/>
+	<field name="Materiales" class="java.lang.String"/>
+	<field name="id_tarea" class="java.lang.Integer"/>
+	<field name="codigo" class="java.lang.Integer"/>
+	<field name="cantidad" class="java.lang.Integer"/>
+	<field name="nom_sector" class="java.lang.String"/>
+	<field name="fecha_actual" class="java.lang.String"/>
+	<field name="PESO_SUBPIEZA" class="java.math.BigDecimal"/>
+	<field name="codigoTarea" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="22" splitType="Stretch">
+			<staticText>
+				<reportElement x="85" y="0" width="43" height="20" uuid="d2391323-b024-4735-b01e-f66bfa2e223a"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Obra N°]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="128" y="0" width="28" height="20" uuid="3a684373-6bd1-4da5-8398-3114171d9786"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Paq.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="156" y="0" width="100" height="22" uuid="22ce8c82-e7bc-449d-8241-e54f929e2b58"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Pieza]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="256" y="0" width="100" height="22" uuid="0d94d8ce-8166-408f-a75d-d1d28678cad4"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Subpieza]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="534" y="0" width="100" height="22" uuid="22dce8c3-e801-4250-810d-8011d99c5ac7"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Materiales]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="634" y="0" width="100" height="22" uuid="909ecb4f-12fd-4f44-975c-6d4d2fd62515"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cant]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="734" y="0" width="68" height="22" uuid="eea3cbfd-5244-4abf-9177-fb70bd4f1a78"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Peso SubP.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="85" height="22" uuid="c27f1966-20e3-4e75-9aa6-c9468636038f"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha Fabri.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="356" y="0" width="178" height="22" uuid="0eca2b21-b6a6-4f32-85ab-75370708683a"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[codigoTarea]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="22" splitType="Stretch">
+			<textField>
+				<reportElement x="85" y="0" width="43" height="22" uuid="11385d0f-b783-48f7-8d71-c2218ed5b23a"/>
+				<textFieldExpression><![CDATA[$F{Obras_numero}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="128" y="0" width="28" height="22" uuid="5407d24d-1a8a-4e86-8228-06095593001d"/>
+				<textFieldExpression><![CDATA[$F{Paquete}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="156" y="0" width="100" height="22" uuid="ae6d5255-1b3f-42f7-8216-dde44a004985"/>
+				<textFieldExpression><![CDATA[$F{Pieza}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="256" y="0" width="100" height="22" uuid="a58b309f-8a16-4bd7-99e0-0e4c8515182a"/>
+				<textFieldExpression><![CDATA[$F{Subpieza}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="534" y="0" width="100" height="22" uuid="bfa54a19-924f-42fc-b8ba-ced7c4b630d7"/>
+				<textFieldExpression><![CDATA[$F{Materiales}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="634" y="0" width="100" height="22" uuid="641cad62-4658-4d0f-b12f-b77e5cc8841e"/>
+				<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.000">
+				<reportElement x="734" y="0" width="68" height="21" uuid="ec9925ea-2fc3-4730-a822-5d02dddcc33f"/>
+				<textFieldExpression><![CDATA[$F{PESO_SUBPIEZA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="85" height="22" uuid="b7c051d8-fed9-41b2-9d2a-a7c7935d218a"/>
+				<textFieldExpression><![CDATA[$F{fecha_fabricacion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="356" y="0" width="178" height="22" uuid="ec9fec65-d266-4479-9ad1-8077e84ddbd5"/>
+				<textFieldExpression><![CDATA[$F{codigoTarea}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

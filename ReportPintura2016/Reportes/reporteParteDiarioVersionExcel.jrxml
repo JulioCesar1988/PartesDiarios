@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteParteDiario" language="groovy" pageWidth="1500" pageHeight="595" orientation="Landscape" whenNoDataType="BlankPage" columnWidth="1460" leftMargin="20" rightMargin="20" topMargin="0" bottomMargin="0" uuid="39ce6051-54f5-4e46-a309-e31c1d802cd7">
+	<property name="ireport.zoom" value="1.6105100000000099"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Title" fontName="Times New Roman" fontSize="50" isBold="true" pdfFontName="Times-Bold"/>
+	<style name="SubTitle" forecolor="#736343" fontName="Arial" fontSize="18"/>
+	<style name="Column header" forecolor="#666666" fontName="Arial" fontSize="12" isBold="true"/>
+	<style name="Detail" fontName="Arial" fontSize="12"/>
+	<style name="Row" mode="Transparent">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+			<style backcolor="#0000CC"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="desde" class="java.lang.String"/>
+	<parameter name="hasta" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select
+Empresas.nombre as empresaNombre, Empleados.legajo, Empleados.apellido+', '+ Empleados.nombre as empleado,
+Parte_Diario_Tarea.fecha, Parte_Diario_Tarea.hora_inicio, Parte_Diario_Tarea.hora_fin,
+Tareas.codigo as tareaCodigo, Tareas.descripcion as tareaNombre, Tareas.descripcion_extra as tareaDescripcion,
+Sectores.nombre as sectorNombre, Obras.numero as obraNumero, Obras.nombre as obraNombre
+
+from Parte_Diario_Tarea
+inner join (Empleados inner join Empresas on Empleados.id_empresa=Empresas.id_empresa)
+on empleados.id_empleado=Parte_Diario_Tarea.id_empleado
+inner join (Tareas inner join Sectores on sectores.id_sector=Tareas.id_sector)
+on Tareas.id_tarea = Parte_Diario_Tarea.id_tarea
+inner join Obras
+on Parte_Diario_Tarea.id_obra=Obras.id_obra
+
+where Parte_Diario_Tarea.activado=1
+and Parte_Diario_Tarea.fecha between $P{desde} and $P{hasta}]]>
+	</queryString>
+	<field name="empresaNombre" class="java.lang.String"/>
+	<field name="legajo" class="java.lang.Integer"/>
+	<field name="empleado" class="java.lang.String"/>
+	<field name="fecha" class="java.util.Date"/>
+	<field name="hora_inicio" class="java.sql.Time"/>
+	<field name="hora_fin" class="java.sql.Time"/>
+	<field name="tareaCodigo" class="java.lang.String"/>
+	<field name="tareaNombre" class="java.lang.String"/>
+	<field name="tareaDescripcion" class="java.lang.String"/>
+	<field name="sectorNombre" class="java.lang.String"/>
+	<field name="obraNumero" class="java.lang.Integer"/>
+	<field name="obraNombre" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="55" splitType="Stretch">
+			<line>
+				<reportElement uuid="0491f135-8452-4d97-b30a-7cba1b085fbd" positionType="FixRelativeToBottom" x="0" y="54" width="1460" height="1"/>
+				<graphicElement>
+					<pen lineWidth="0.5" lineColor="#999999"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement uuid="747ef664-f296-4d16-9a66-4c7b5de894c2" style="Title" x="0" y="0" width="1460" height="41" forecolor="#333333"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="30" pdfFontName="Times-Roman"/>
+				</textElement>
+				<text><![CDATA[Parte Diario de Tareas]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="18cc77f6-b61b-426d-a7b3-62b653ebc4c4" style="Column header" x="0" y="41" width="48" height="14" forecolor="#000066"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Empresa]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="91847446-0eae-462a-b099-5bfc7769ce31" style="Column header" x="48" y="41" width="29" height="14" forecolor="#000066"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Legajo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ef4cda94-318a-4bd1-8876-6c78fbecfce3" style="Column header" x="263" y="41" width="59" height="14" forecolor="#000066"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Fecha]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="dad9abbd-22e0-426b-9eb6-21ee8bcc74fe" style="Column header" x="322" y="41" width="34" height="14" forecolor="#000066"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Inicio]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="50457594-4eb0-4343-98ce-29b72f274753" style="Column header" x="356" y="41" width="37" height="14" forecolor="#000066"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Fin]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3ee74d5c-fc02-4a1a-a99a-b017dc091a39" style="Column header" x="393" y="41" width="34" height="14" forecolor="#000066"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Código]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="afe75542-fbdb-42e2-8b73-d977fbee080a" style="Column header" x="427" y="41" width="428" height="14" forecolor="#000066"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Tarea]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="42913888-6b29-4425-906d-0b2f262e3da1" style="Column header" x="855" y="41" width="256" height="14" forecolor="#000066"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Descripción]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="8c5bfa03-4f4f-4f28-880f-b02e96cd9304" style="Column header" x="1111" y="41" width="87" height="14" forecolor="#000066"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Sector]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="e111959f-5770-4819-bcca-642fc360d9e5" style="Column header" x="77" y="41" width="186" height="14" forecolor="#000066"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Empleado]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="6c464279-419d-4492-9eaa-3cab809e6b9b" style="Column header" x="1198" y="41" width="29" height="14" forecolor="#000066"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Obra ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="2301f6a5-2fab-4756-975f-5bd81af3db6f" style="Column header" x="1227" y="41" width="233" height="14" forecolor="#000066"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Obra Nombre]]></text>
+			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band height="11" splitType="Stretch">
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy">
+				<reportElement uuid="0259b59b-a43d-4adf-a0ee-3cc7aefba13b" style="Detail" x="263" y="0" width="59" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fecha}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="HH:mm">
+				<reportElement uuid="23d5b09f-be71-4c6e-b271-747009ae35e2" style="Detail" x="322" y="0" width="34" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{hora_inicio}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="HH:mm">
+				<reportElement uuid="e4b6bb85-217b-487f-a78b-acca2664eaab" style="Detail" x="356" y="0" width="37" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{hora_fin}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="585bc1d0-89e2-4140-8da3-15b48f456b8a" style="Detail" x="427" y="0" width="428" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tareaNombre}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="e246e6da-d050-4ea5-a1f3-16e23ceb1655" style="Detail" x="393" y="0" width="34" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tareaCodigo}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="97d41f86-082f-42e7-92b8-45abefb6c557" style="Detail" x="1111" y="0" width="87" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{sectorNombre}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="af6bb074-d7ef-4eeb-ae97-09007811f260" style="Detail" x="0" y="0" width="48" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{empresaNombre}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="48b13f7e-91ef-48c3-a099-0eeae7c25120" style="Detail" x="48" y="0" width="29" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{legajo}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="53b6b94d-017f-444b-953a-8ee3b1f3db36" style="Detail" x="77" y="0" width="186" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{empleado}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="3f144417-b3b5-4d0b-8d98-49a4a84bd7f6" style="Detail" x="1227" y="0" width="233" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{obraNombre}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="4b46915d-dd36-4ca9-a465-dbb905d0d9c4" style="Detail" x="1198" y="0" width="29" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{obraNumero}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="8a9bc9bc-54a0-4d10-bdf2-ea318c02c492" style="Detail" x="855" y="0" width="256" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tareaDescripcion}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

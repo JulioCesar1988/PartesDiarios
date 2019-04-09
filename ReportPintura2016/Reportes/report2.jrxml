@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report2" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="4ffce327-3005-4b41-a8ac-6453b68b2c53">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="fecha1" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha2" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="sector" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select count(piezas.codigo) as 'cantidad',Obras.numero as 'obra numero',Obras.nombre as 'obra nombre',paquetes.numero as 'paquete numero', (Piezas.elemento + cast(Piezas.correlatividad as varchar(20))) as Pieza,
+(Subpiezas.elemento + cast(Subpiezas.correlatividad as varchar(20))) as Subpieza,Tareas."codigo" + ' - '+ Tareas."descripcion" AS Tarea,Empleados.apellido,empleados.nombre as 'empleado nombre',Convert(char(10), Subpiezas_Tareas.fecha_finalizado, 103) as 'fecha_finalizado',Subpiezas_Tareas.estado,Sectores.nombre as'sector nombre',
+Subpiezas.peso as 'PesoSubpieza'
+from Subpiezas_Tareas inner join Tareas
+on Subpiezas_Tareas.id_tarea=Tareas.id_tarea inner join Sectores
+on Tareas.id_sector=Sectores.id_sector inner join Subpiezas
+on Subpiezas_Tareas.id_subpieza=Subpiezas.id_subpieza inner join Piezas
+on Subpiezas.id_pieza=Piezas.id_pieza inner join Paquetes
+on Piezas.id_paquete=Paquetes.id_paquete inner join Obras
+on Paquetes.id_obra=Obras.id_obra inner join Empleados
+on Empleados.id_empleado=Subpiezas_Tareas.id_empleado
+
+where ((cast(Subpiezas_Tareas.fecha_finalizado as date)) between $P{fecha1} and $P{fecha2})
+and Subpiezas_Tareas.estado='finalizado'
+and Sectores.nombre=$P{sector}
+and Subpiezas_Tareas.activado='true'
+group by obras.numero,obras.nombre,paquetes.numero,piezas.elemento,
+piezas.correlatividad,subpiezas.elemento,subpiezas.correlatividad,
+tareas.codigo,tareas.descripcion,empleados.apellido,empleados.nombre,
+Convert(char(10), Subpiezas_Tareas.fecha_finalizado, 103),
+Subpiezas_Tareas.estado,Sectores.nombre,Subpiezas.peso]]>
+	</queryString>
+	<field name="nombre" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="61" splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="125" splitType="Stretch"/>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

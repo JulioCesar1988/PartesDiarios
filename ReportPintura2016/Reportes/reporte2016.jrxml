@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporte2016" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9d77327c-337c-4688-b3e1-5456f61a547a">
+	<property name="ireport.zoom" value="1.6105100000000008"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="fecha1" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha2" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT   COUNT(distinct(PIEZAS.ID_PIEZA))	 AS CANTIDADPIEZA,
+         OBRAS.NUMERO       				 AS NUMERO_OBRA,
+         OBRAS.NOMBRE						 AS NOMBRE_OBRA,
+         PAQUETES.NUMERO					 AS NUMERO_PAQUETE,
+         PIEZAS.CORRELATIVIDAD				 AS CORRELATIVIDAD_PIEZA,
+         PIEZAS.DESCRIPCION					 AS DESCRIPCION_PIEZA,
+         PIEZAS.ELEMENTO					 AS ELEMENTO_PIEZA,
+         SUM(SUBPIEZAS.PESO)				 AS PESO,
+         PIEZAS.AREA						 AS AREA_PIEZA,
+         CATEGORIA_CTRL_PRODUCCION.CATEGORIA AS CATEGORIA_PIEZA,
+         pintura.fecha                       as FechaFinalizacido
+
+FROM (SELECT * FROM PINTURA WHERE ACTIVADO = 1 AND FECHA between $P{fecha1} and $P{fecha2} )PINTURA  LEFT  JOIN (SELECT * FROM PIEZAS WHERE ACTIVADO = 1)AS PIEZAS          ON (PINTURA.ID_PIEZA = PIEZAS.ID_PIEZA       )
+              LEFT JOIN (SELECT * FROM SUBPIEZAS WHERE ACTIVADO =1)AS SUBPIEZAS          ON (PIEZAS.ID_PIEZA = SUBPIEZAS.ID_PIEZA     )
+             LEFT JOIN (SELECT * FROM PAQUETES WHERE ACTIVADO = 1)AS PAQUETES           ON (PIEZAS.ID_PAQUETE = PAQUETES.ID_PAQUETE  )
+             LEFT JOIN (SELECT * FROM OBRAS WHERE ACTIVADO = 1)   AS OBRAS              ON (PAQUETES.ID_OBRA = OBRAS.ID_OBRA         )
+
+             LEFT JOIN CATEGORIA_CTRL_PRODUCCION ON ( PIEZAS.ID_CATEGORIA =  CATEGORIA_CTRL_PRODUCCION.ID_CATEGORIA)
+WHERE
+      OBRAS.ACTIVADO     = 1   AND
+      PAQUETES.ACTIVADO  = 1   AND
+      PINTURA.ACTIVADO   = 1   AND
+      PIEZAS.ACTIVADO    = 1   AND
+      OBRAS.ACTIVADO     = 1   AND
+      PIEZAS.ACTIVADO    = 1   AND
+      PAQUETES.ACTIVADO  = 1   AND
+      SUBPIEZAS.ACTIVADO = 1  AND pintura.fecha between $P{fecha1} and $P{fecha2}
+
+GROUP BY   CATEGORIA_CTRL_PRODUCCION.CATEGORIA,
+           PIEZAS.AREA,
+           PIEZAS.CORRELATIVIDAD,
+           PIEZAS.ELEMENTO,
+           OBRAS.NOMBRE,
+           OBRAS.NUMERO,
+           PAQUETES.NUMERO,
+           PIEZAS.DESCRIPCION,
+           pintura.fecha]]>
+	</queryString>
+	<field name="CANTIDADPIEZA" class="java.lang.Integer"/>
+	<field name="NUMERO_OBRA" class="java.lang.Integer"/>
+	<field name="NOMBRE_OBRA" class="java.lang.String"/>
+	<field name="NUMERO_PAQUETE" class="java.lang.Integer"/>
+	<field name="CORRELATIVIDAD_PIEZA" class="java.lang.String"/>
+	<field name="DESCRIPCION_PIEZA" class="java.lang.String"/>
+	<field name="ELEMENTO_PIEZA" class="java.lang.String"/>
+	<field name="PESO" class="java.math.BigDecimal"/>
+	<field name="AREA_PIEZA" class="java.lang.String"/>
+	<field name="CATEGORIA_PIEZA" class="java.lang.String"/>
+	<field name="FechaFinalizacido" class="java.sql.Timestamp"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="23" splitType="Stretch">
+			<staticText>
+				<reportElement x="146" y="1" width="84" height="22" uuid="af498608-db4c-403d-8f8d-7eca1495acfb"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isBold="false" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[N°  Paq]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="230" y="-1" width="100" height="23" uuid="a17ff397-4292-4ebe-a344-89cb1a9895e2"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isBold="false" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Posicion]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="330" y="1" width="150" height="22" uuid="4dd87e47-4f5c-472b-9930-90d67d94b74f"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isBold="false" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Peso]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="480" y="-1" width="100" height="23" uuid="aa73fdf0-de94-4437-9997-3df607d4c9fa"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isBold="false" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Area de pieza]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="580" y="1" width="134" height="21" uuid="1deb39b5-8ed2-4362-b921-0ea6bd57341f"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isBold="false" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Categoria de control]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="71" y="0" width="75" height="23" uuid="256d67b5-8e26-4bbf-aad3-18a908b021af"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isBold="false" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[N° de Obra]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="0" width="71" height="23" uuid="7c3df6da-0584-49f9-9ba9-fa450352282a"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isBold="false" isItalic="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Cant]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="714" y="1" width="88" height="21" uuid="6c8ccf72-3ecd-4e3f-b38e-7aaf9a1729f2"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Fecha]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="23" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="71" height="23" uuid="9492a832-136b-4eb6-9454-6ce522d5730c"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CANTIDADPIEZA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="71" y="0" width="75" height="23" uuid="875530fa-a151-4d4d-94f0-720e2e656f2d"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NUMERO_OBRA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="146" y="0" width="84" height="23" uuid="99634754-4c8f-4a61-9869-674a2051d722"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NUMERO_PAQUETE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="230" y="0" width="100" height="23" uuid="558c71c3-6620-4bde-b6fc-f01088729f1f"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ELEMENTO_PIEZA}+" "+$F{CORRELATIVIDAD_PIEZA}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00">
+				<reportElement x="330" y="0" width="150" height="23" uuid="00fbd622-ecfa-4cb9-ac2f-e9e652125664"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PESO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="480" y="0" width="100" height="23" uuid="6e8e6d26-a5e1-4e97-b796-3c5f64eeb813"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{AREA_PIEZA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="580" y="0" width="134" height="23" uuid="e24fc279-ec7f-4773-9516-122408d92e5e"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CATEGORIA_PIEZA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="714" y="0" width="88" height="23" uuid="765258ea-f88c-4652-9b97-ddac044dac13"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom"/>
+				<textFieldExpression><![CDATA[$F{FechaFinalizacido}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

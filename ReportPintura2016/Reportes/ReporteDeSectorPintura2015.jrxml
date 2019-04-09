@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ReporteDeSectorPintura2015" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="3dc9a27c-f1da-488e-aad0-b123e9a101f5">
+	<property name="ireport.zoom" value="1.6105100000000017"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="numObra" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="numPaquete" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha1" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha2" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT   COUNT(distinct(PIEZAS.ID_PIEZA))	 AS CANTIDADPIEZA,
+         OBRAS.NUMERO       				 AS NUMERO_OBRA,
+         OBRAS.NOMBRE						 AS NOMBRE_OBRA,
+         PAQUETES.NUMERO					 AS NUMERO_PAQUETE,
+         PIEZAS.CORRELATIVIDAD				 AS CORRELATIVIDAD_PIEZA,
+         PIEZAS.DESCRIPCION					 AS DESCRIPCION_PIEZA,
+         PIEZAS.ELEMENTO					 AS ELEMENTO_PIEZA,
+         SUM(SUBPIEZAS.PESO)				 AS PESO,
+         PIEZAS.AREA						 AS AREA_PIEZA,
+         CATEGORIA_CTRL_PRODUCCION.CATEGORIA AS CATEGORIA_PIEZA
+
+
+
+FROM PINTURA LEFT  JOIN PIEZAS          ON (PINTURA.ID_PIEZA = PIEZAS.ID_PIEZA       )
+             INNER JOIN PAQUETES        ON (PIEZAS.ID_PAQUETE = PAQUETES.ID_PAQUETE  )
+             INNER JOIN OBRAS           ON (PAQUETES.ID_OBRA = OBRAS.ID_OBRA         )
+             INNER JOIN SUBPIEZAS       ON (PIEZAS.ID_PIEZA = SUBPIEZAS.ID_PIEZA     )
+             INNER JOIN CATEGORIA_CTRL_PRODUCCION ON ( PIEZAS.ID_CATEGORIA =  CATEGORIA_CTRL_PRODUCCION.ID_CATEGORIA)
+WHERE
+      OBRAS.ACTIVADO     = 1   AND
+      PAQUETES.ACTIVADO  = 1   AND
+      PINTURA.ACTIVADO   = 1   AND
+      PIEZAS.ACTIVADO    = 1   AND
+      OBRAS.ACTIVADO     = 1   AND
+      PIEZAS.ACTIVADO    = 1   AND
+      PAQUETES.ACTIVADO  = 1   AND
+      SUBPIEZAS.ACTIVADO = 1   AND
+      OBRAS.NUMERO       = $P{numObra}
+
+GROUP BY   CATEGORIA_CTRL_PRODUCCION.CATEGORIA,
+           PIEZAS.AREA,
+           PIEZAS.CORRELATIVIDAD,
+           PIEZAS.ELEMENTO,
+           OBRAS.NOMBRE,
+           OBRAS.NUMERO,
+           PAQUETES.NUMERO,
+           PIEZAS.DESCRIPCION]]>
+	</queryString>
+	<field name="CANTIDADPIEZA" class="java.lang.Integer"/>
+	<field name="NUMERO_OBRA" class="java.lang.Integer"/>
+	<field name="NOMBRE_OBRA" class="java.lang.String"/>
+	<field name="NUMERO_PAQUETE" class="java.lang.Integer"/>
+	<field name="CORRELATIVIDAD_PIEZA" class="java.lang.String"/>
+	<field name="DESCRIPCION_PIEZA" class="java.lang.String"/>
+	<field name="ELEMENTO_PIEZA" class="java.lang.String"/>
+	<field name="PESO" class="java.math.BigDecimal"/>
+	<field name="AREA_PIEZA" class="java.lang.String"/>
+	<field name="CATEGORIA_PIEZA" class="java.lang.String"/>
+	<variable name="PESO_1" class="java.math.BigDecimal" resetType="Group" resetGroup="CATEGORIA" calculation="Sum">
+		<variableExpression><![CDATA[$F{PESO}]]></variableExpression>
+	</variable>
+	<variable name="CANTIDADPIEZA_1" class="java.lang.Integer" resetType="Group" resetGroup="CATEGORIA" calculation="Sum">
+		<variableExpression><![CDATA[$F{CANTIDADPIEZA}]]></variableExpression>
+	</variable>
+	<variable name="PESO_2" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{PESO}]]></variableExpression>
+	</variable>
+	<variable name="CANTIDADPIEZA_2" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{CANTIDADPIEZA}]]></variableExpression>
+	</variable>
+	<variable name="NUMERO_PAQUETE_1" class="java.lang.Integer" calculation="DistinctCount">
+		<variableExpression><![CDATA[$F{NUMERO_PAQUETE}]]></variableExpression>
+	</variable>
+	<group name="CATEGORIA">
+		<groupExpression><![CDATA[$F{CATEGORIA_PIEZA}]]></groupExpression>
+		<groupHeader>
+			<band height="22">
+				<rectangle>
+					<reportElement x="0" y="0" width="802" height="22" uuid="070f6968-f8df-47f3-8032-1dc59d6f708d"/>
+				</rectangle>
+				<textField>
+					<reportElement mode="Opaque" x="115" y="0" width="687" height="22" forecolor="#666666" backcolor="#99B4D1" uuid="a82c477b-aa0b-42b1-ad72-243614d30626"/>
+					<textElement textAlignment="Justified" verticalAlignment="Middle">
+						<font isBold="true" isItalic="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{CATEGORIA_PIEZA}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Opaque" x="0" y="0" width="115" height="22" forecolor="#666666" backcolor="#99B4D1" uuid="ef761e8f-357e-4f30-b63c-c1f4e0057d40"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="12" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Categoria ]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="19">
+				<textField pattern="###0.00">
+					<reportElement x="575" y="0" width="227" height="19" forecolor="#999999" uuid="bdcd21a9-0e8a-486c-81b4-b8786b17c02f"/>
+					<textElement textAlignment="Center" verticalAlignment="Bottom">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{PESO_1}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="345" y="0" width="230" height="19" forecolor="#999999" uuid="1ddec78d-cf6f-4a76-9a59-7e17d1f490c1"/>
+					<textElement textAlignment="Center" verticalAlignment="Bottom">
+						<font size="12" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Peso Total por Categoria]]></text>
+				</staticText>
+				<textField>
+					<reportElement x="230" y="0" width="115" height="19" forecolor="#999999" uuid="97b64728-df56-47af-9481-731d386f3c1d"/>
+					<textElement textAlignment="Center" verticalAlignment="Bottom">
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{CANTIDADPIEZA_1}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="0" y="0" width="230" height="19" forecolor="#999999" uuid="559d5771-aba5-471b-ab39-fb3bfac85dbb"/>
+					<textElement textAlignment="Right" verticalAlignment="Bottom">
+						<font size="12" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Cantidad de elementos por categoria]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="106" splitType="Stretch">
+			<rectangle>
+				<reportElement x="0" y="0" width="802" height="106" uuid="04a24f51-5c52-483f-9244-5573f3a3d421"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="230" y="2" width="395" height="104" forecolor="#999999" uuid="e2188530-bba4-4156-a66e-ba345ac4e676"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="32" isBold="false" isItalic="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Informe de sector pintura ]]></text>
+			</staticText>
+			<textField pattern="MM/dd/yyyy">
+				<reportElement x="702" y="72" width="100" height="34" uuid="f6e956d4-a788-49db-bfea-2ee85908a144"/>
+				<textElement verticalAlignment="Bottom"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="625" y="72" width="77" height="34" uuid="6494e4ef-bb79-4112-a69f-e06eb8fc4171"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom"/>
+				<text><![CDATA[Fecha]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="0" y="0" width="230" height="106" uuid="f8ed7a30-bc34-46fc-91c5-e38ace415c6c"/>
+			</rectangle>
+			<image>
+				<reportElement x="24" y="2" width="165" height="104" uuid="460633a0-08c5-493c-9b17-57f79ce3ec84"/>
+				<imageExpression><![CDATA["Reportes\\logo01.jpg"]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="625" y="2" width="177" height="25" forecolor="#999999" uuid="23ffc0ee-9d6c-470e-8497-7256800cba49"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="false" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Tipo de Filtro Aplicado]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="702" y="27" width="100" height="20" forecolor="#999999" uuid="23f35603-3e23-46ce-80e3-7d1c6c86e512"/>
+				<textElement verticalAlignment="Bottom">
+					<font isBold="true" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{numObra}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Transparent" x="625" y="27" width="77" height="20" forecolor="#999999" backcolor="#E3E3E3" uuid="c92411be-65cb-4f42-84e0-fee3808edb45"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font size="12" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Obra : ]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="22" splitType="Stretch">
+			<rectangle>
+				<reportElement x="0" y="0" width="115" height="22" uuid="ddf8f5ac-cab3-4e6f-9cd8-f68d1a90773f"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="115" y="0" width="115" height="22" uuid="6b8cddb0-3be4-4568-886f-cb7f09e544aa"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="230" y="0" width="115" height="22" uuid="b65ff3a6-a236-4e55-9086-2de4b6f7e21a"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="345" y="0" width="115" height="22" uuid="182f734f-8e97-4ef5-8163-13f304f56dd0"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="460" y="0" width="115" height="22" uuid="a167e6f7-5756-44f7-81d6-1c6c230dad67"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="575" y="0" width="227" height="22" uuid="23d921d1-cb43-436e-81af-633dea522838"/>
+			</rectangle>
+			<staticText>
+				<reportElement mode="Transparent" x="230" y="2" width="115" height="20" forecolor="#999999" backcolor="#E3E3E3" uuid="488d8682-1795-4552-ba8a-551fc7dd9c69"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Cantidad]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="345" y="0" width="115" height="20" forecolor="#999999" backcolor="#E3E3E3" uuid="ca09fa74-c1a7-4108-a961-765eac48dc03"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Posicion]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="460" y="2" width="115" height="20" forecolor="#999999" backcolor="#E3E3E3" uuid="06037297-c598-4af5-ac61-583e5353e948"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Descripcion]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="575" y="2" width="227" height="20" forecolor="#999999" backcolor="#E3E3E3" uuid="cfa9e990-b4b7-4ddd-bbfa-d379ccbbaff9"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Peso]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="0" y="0" width="115" height="22" forecolor="#999999" backcolor="#E3E3E3" uuid="f139b079-d7eb-4c5b-a47e-7c20c62435a5"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[N° Obra]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="115" y="2" width="115" height="20" forecolor="#999999" backcolor="#E3E3E3" uuid="e0be63dd-6db5-4991-99e3-3f292c7559ba"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Lista]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="22" splitType="Stretch">
+			<rectangle>
+				<reportElement x="0" y="0" width="115" height="22" uuid="5ffba748-b240-4d04-8426-ca9b84ef83d9"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="115" y="0" width="115" height="22" uuid="93444da8-76e8-4f49-be00-a44b069d71c3"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="230" y="0" width="115" height="22" uuid="a5241547-6c41-44ea-bb48-97a194bdf902"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="345" y="0" width="115" height="22" uuid="ffd12af2-7ba7-4d8d-bb30-90bd15b15e28"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="460" y="0" width="115" height="22" uuid="96266957-9f0c-45f8-b38a-ca575a653c5b"/>
+			</rectangle>
+			<textField>
+				<reportElement x="115" y="2" width="115" height="20" uuid="93d2ec05-163e-4765-9eaa-e9bc14da1519"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NUMERO_PAQUETE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="2" width="115" height="20" uuid="33051300-1f74-48f2-8371-469b6603ed3a"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NUMERO_OBRA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="230" y="2" width="115" height="20" uuid="0c10634e-d703-4b00-95e2-2f6112c116de"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CANTIDADPIEZA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="345" y="2" width="115" height="20" uuid="24ef0b49-9c94-43a6-b7cd-fdae6334cefa"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ELEMENTO_PIEZA}+$F{CORRELATIVIDAD_PIEZA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="460" y="2" width="115" height="20" uuid="368f778c-b293-464b-b040-0dfff9203d92"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DESCRIPCION_PIEZA}]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement x="575" y="0" width="227" height="22" uuid="5803d722-5865-489b-abf9-d514b794db24"/>
+			</rectangle>
+			<textField pattern="###0.00">
+				<reportElement x="575" y="2" width="227" height="20" uuid="bc3a3a0a-6b4d-4118-91cc-b8dd0a9f1755"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PESO}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<summary>
+		<band height="24" splitType="Stretch">
+			<rectangle>
+				<reportElement x="0" y="0" width="802" height="24" uuid="b4e47d9f-5c70-4002-a0d1-04898bed7189"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="0" y="0" width="115" height="24" forecolor="#666666" uuid="42e63a7d-e9a9-4944-86fd-1172400c8d04"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cantidad Total de listas]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="115" y="0" width="59" height="24" forecolor="#666666" uuid="54536eae-bcab-466f-b21d-27468c86df1c"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{NUMERO_PAQUETE_1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="361" y="0" width="115" height="24" forecolor="#666666" uuid="89bf3293-a02a-4e74-ba70-58e1debbcdbd"/>
+				<textElement verticalAlignment="Bottom">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{CANTIDADPIEZA_2}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="174" y="0" width="187" height="24" forecolor="#666666" uuid="8e8445cc-245d-4179-9676-111220631a43"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cantidad total de Piezas]]></text>
+			</staticText>
+			<textField pattern="###0.00">
+				<reportElement x="547" y="0" width="255" height="24" forecolor="#666666" uuid="1ef54ece-96d3-424e-a640-3205d388d1d6"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PESO_2}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="476" y="0" width="71" height="24" forecolor="#666666" uuid="00fbb8f5-25a9-4adc-8329-16f2b1dd000e"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PESO TOTAL ]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

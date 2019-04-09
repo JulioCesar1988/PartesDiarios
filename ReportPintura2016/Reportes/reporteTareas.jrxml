@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporte1" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="51bcdb09-9195-4e6d-99ec-e0c144df101b">
+	<property name="ireport.zoom" value="1.4641000000000006"/>
+	<property name="ireport.x" value="7"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Header Header" mode="Opaque" forecolor="#000000" backcolor="#0000CC" fill="Solid" fontName="DejaVu Sans" fontSize="10" isBold="true"/>
+	<style name="Titulo" mode="Transparent" forecolor="#000000" backcolor="#000000" fontSize="22" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Fila" forecolor="#000000" backcolor="#F0F0F0" fontName="SansSerif" fontSize="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+	<parameter name="filtroSector" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="orden" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[declare @idSector int;
+set @idSector = (select Sectores.id_sector from Sectores where Sectores.nombre =$P{filtroSector})
+
+select Tareas.codigo, Sectores.nombre, tareas.descripcion, Tareas.descripcion_extra, Sectores.nombre as sector
+from Tareas
+inner join Sectores
+on Sectores.id_sector=Tareas.id_sector
+where tareas.activado=1
+
+and (tareas.id_sector = @idSector or @idSector is null)
+ORDER BY
+  CASE
+  WHEN $P{orden} = 1 THEN CAST(Tareas.codigo as varchar)
+  ELSE NULL
+  END;]]>
+	</queryString>
+	<field name="codigo" class="java.lang.String"/>
+	<field name="nombre" class="java.lang.String"/>
+	<field name="descripcion" class="java.lang.String"/>
+	<field name="descripcion_extra" class="java.lang.String"/>
+	<field name="sector" class="java.lang.String"/>
+	<group name="Area">
+		<groupExpression><![CDATA[$F{nombre}]]></groupExpression>
+		<groupHeader>
+			<band height="36">
+				<frame>
+					<reportElement uuid="f8798e08-d311-4dbc-abd9-d43bb5bca172" x="0" y="19" width="555" height="16"/>
+					<staticText>
+						<reportElement uuid="94d6fc09-87f8-4ee9-81ec-c036494855fe" style="Header Header" mode="Transparent" x="18" y="0" width="43" height="14"/>
+						<textElement/>
+						<text><![CDATA[Código]]></text>
+					</staticText>
+					<staticText>
+						<reportElement uuid="79cb9e4c-8610-4291-bda1-9733522f0687" style="Header Header" mode="Transparent" x="156" y="0" width="205" height="14"/>
+						<textElement/>
+						<text><![CDATA[Descripcion]]></text>
+					</staticText>
+					<staticText>
+						<reportElement uuid="230d63eb-3572-475b-bb12-9bf94b982a2d" style="Header Header" mode="Transparent" x="361" y="0" width="187" height="14"/>
+						<textElement/>
+						<text><![CDATA[Descripcion Extra]]></text>
+					</staticText>
+					<staticText>
+						<reportElement uuid="a74e2284-c5c9-4011-a2d0-3d476f2adcd3" style="Header Header" mode="Transparent" x="61" y="0" width="95" height="14"/>
+						<textElement/>
+						<text><![CDATA[Área]]></text>
+					</staticText>
+				</frame>
+				<frame>
+					<reportElement uuid="276498cb-9798-4333-97d1-a0adf12d3398" x="0" y="0" width="555" height="20"/>
+					<textField>
+						<reportElement uuid="d1c073d9-0d7b-4e07-a10f-9c726bb645bf" stretchType="RelativeToTallestObject" x="0" y="0" width="361" height="20"/>
+						<textElement>
+							<font size="14"/>
+						</textElement>
+						<textFieldExpression><![CDATA[$F{nombre}]]></textFieldExpression>
+					</textField>
+				</frame>
+				<line>
+					<reportElement uuid="1227ed3a-1df6-4098-9290-b0928a686ff7" x="0" y="35" width="555" height="1"/>
+				</line>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="63" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="bd675c9b-2f32-4e58-96ae-c82a36a7a709" style="Titulo" x="61" y="0" width="234" height="29"/>
+				<textElement/>
+				<text><![CDATA[Reporte de Tareas]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="68651646-96e6-4432-bb99-9fc101d274bf" x="365" y="24" width="183" height="20"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Odenado por: " + (
+    $P{orden}.equals(1) ? "Código" : ""
+    )]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="2fad19de-33a1-4846-860d-acdf768bd9ec" x="365" y="4" width="183" height="20"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Filtro de Sector: " + (
+$P{filtroSector}.equals("null" )? "" : $P{filtroSector}
+    )]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement uuid="ca5945e7-5cb3-4a71-8961-125f7487d59f" style="Titulo" x="361" y="0" width="194" height="63"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="a41327c7-55b5-41aa-8267-68601135877c" style="Titulo" x="0" y="0" width="361" height="63"/>
+			</rectangle>
+			<image>
+				<reportElement uuid="01e4ff3b-9613-490a-991c-6b58fe603f1b" x="0" y="0" width="61" height="63"/>
+				<imageExpression><![CDATA["Reportes\\logo01.jpg"]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="20" splitType="Stretch"/>
+	</pageHeader>
+	<detail>
+		<band height="26" splitType="Stretch">
+			<textField>
+				<reportElement uuid="fdd65605-0d72-472f-b130-51da6496e03f" style="Fila" stretchType="RelativeToTallestObject" x="365" y="0" width="169" height="26"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{descripcion_extra}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="51346911-6d81-4cd1-bbef-065bc9987bfb" style="Fila" stretchType="RelativeToTallestObject" x="29" y="0" width="32" height="26"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{codigo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="31995808-6361-468e-abfa-a9cdf6adaed3" style="Fila" stretchType="RelativeToTallestObject" x="62" y="0" width="94" height="26"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{sector}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="570ada5f-8c8b-4036-bec3-fb3ebaf63244" style="Fila" stretchType="RelativeToTallestObject" x="159" y="0" width="202" height="26"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="11" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="20" splitType="Stretch">
+			<rectangle>
+				<reportElement uuid="1f1e18e4-787c-4fb2-82c2-08f6a4cf285e" x="0" y="0" width="555" height="20"/>
+			</rectangle>
+			<textField evaluationTime="Report">
+				<reportElement uuid="f6d5b7bb-85a0-4feb-8087-3b247c1ff3a4" x="511" y="0" width="40" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="0a2821b2-7275-4231-a674-fab11428a862" x="431" y="0" width="80" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Pag. "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

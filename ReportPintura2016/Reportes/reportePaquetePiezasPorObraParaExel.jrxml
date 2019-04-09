@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="b7fc91d6-5b00-4d1b-a255-50c11f04cb78">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="962"/>
+	<property name="ireport.y" value="0"/>
+	<style name="SubTitle" forecolor="#736343" fontName="Arial" fontSize="18"/>
+	<style name="Column header" forecolor="#666666" fontSize="10" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Detail" fontName="Arial" fontSize="12"/>
+	<style name="Row" mode="Transparent">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+			<style backcolor="#0000CC"/>
+		</conditionalStyle>
+	</style>
+	<style name="Encabezado de columnas" forecolor="#666666" isBlankWhenNull="true" fontSize="10" isBold="true" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<style name="Tabla de control" vAlign="Middle" fontSize="8"/>
+	<style name="Tabla de control Datos" vAlign="Middle" fontSize="7" isItalic="true"/>
+	<style name="Title" fontName="Times New Roman" fontSize="30" isBold="true" pdfFontName="Times-Bold"/>
+	<style name="style1"/>
+	<style name="Column header estatico" forecolor="#000000" fontName="SansSerif" fontSize="10" isBold="true" isItalic="true"/>
+	<parameter name="obra_num" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[declare @numeroObra int
+
+set @numeroObra = $P{obra_num}
+
+select * from
+(
+SELECT
+remitos.numero,
+CONVERT(varchar(11), remitos.fecha, 103) as fecha_remito,
+     Count(Piezas.codigo) AS cantidad,
+     Obras."numero" AS Obras_numero,
+     Obras."nombre" AS Obras_nombre,
+     Obras."direccion" AS Obras_direccion,
+     Obras."localidad" AS Obras_localidad,
+     Obras."provincia" AS Obras_provincia,
+     Edificio."nombre" AS Edificio_nombre,
+     Paquetes."numero" AS Paquetes_numero,
+     Paquetes."numero_revision" AS Paquetes_numero_revision,
+     Paquetes."descripcion" AS Paquetes_descripcion,
+     Paquetes."fecha_fabricacion" AS Paquetes_fecha_fabricacion,
+     Paquetes."fecha_despacho" AS Paquetes_fecha_despacho,
+	/* SUM(Subpiezas.peso) as sumaPeso,*/
+     Piezas."elemento" AS Piezas_elemento,
+     Piezas."correlatividad" AS Piezas_correlatividad,
+     Piezas."descripcion" AS Piezas_descripcion,
+     Piezas."descripcion_extra" AS Piezas_descripcion_extra,
+     Piezas."largo" AS Piezas_largo,
+     Piezas."pintura" AS Piezas_pintura,
+     Piezas."color" AS Piezas_color,
+     Piezas."area" AS Piezas_area,
+     Piezas."codigo" AS Piezas_codigo,
+     Piezas."ubicacion" AS Piezas_ubicacion,
+   /*  SUM(Subpiezas.peso) as PesoPiesa,*/
+
+     categoria_ctrl_produccion.categoria
+FROM
+
+     "dbo"."Obras" Obras INNER JOIN "dbo"."Edificio" Edificio ON Obras."id_obra" = Edificio."id_obra"
+     INNER JOIN "dbo"."Paquetes" Paquetes ON Edificio."id_edificio" = Paquetes."id_edificio"
+     AND Obras."id_obra" = Paquetes."id_obra"
+     INNER JOIN "dbo"."Piezas" Piezas ON Paquetes."id_paquete" = Piezas."id_paquete"
+
+
+left join Piezas_Remitos on piezas.id_pieza=Piezas_Remitos.id_pieza
+		 left join Remitos on Piezas_Remitos.id_remito=remitos.id_remito
+left join categoria_ctrl_produccion on piezas.id_categoria=categoria_ctrl_produccion.id_categoria
+
+
+WHERE
+     Obras.activado = 1
+     and Paquetes.activado = 1
+     and paquetes.id_paquete in (select id_paquete from Paquete_Empleado_Aprobado_Produccion)
+     and Edificio.activado = 1
+     and Piezas.activado = 1
+     and Obras.numero = @numeroObra
+
+
+GROUP BY
+     Obras."numero",
+     Obras."nombre",
+     Obras."direccion",
+     Obras."localidad",
+     Obras."provincia",
+     Edificio."nombre",
+     Paquetes."numero",
+     Paquetes."numero_revision",
+     Paquetes."descripcion",
+     Paquetes."fecha_fabricacion",
+     Paquetes."fecha_despacho",
+
+     Piezas."elemento",
+     Piezas."correlatividad",
+     Piezas."descripcion",
+     Piezas."descripcion_extra",
+     Piezas."largo",
+     Piezas."pintura",
+     Piezas."color",
+     Piezas."area",
+     Piezas."codigo",
+     Piezas."ubicacion",
+
+
+   remitos.numero,
+     remitos.fecha,
+categoria_ctrl_produccion.categoria
+) as T1
+inner join
+(
+select distinct(Piezas.codigo), SUM(Subpiezas.peso)as sumaPeso from
+				 Piezas
+				 inner join Subpiezas
+				 on Piezas.id_pieza=Subpiezas.id_pieza
+				 where Piezas.activado=1 and piezas.codigo in (
+																select Piezas.codigo from
+																Obras inner join Paquetes
+																inner join Piezas
+																on Paquetes.id_paquete=Piezas.id_paquete
+																on Obras.id_obra=Paquetes.id_obra
+
+																where Obras.numero=@numeroObra
+																)
+				 group by Piezas.codigo, Subpiezas.id_pieza
+
+) as T2
+on T1.Piezas_codigo=T2.codigo
+
+
+
+
+
+
+Order by t1.Paquetes_numero, T1.Piezas_area, T1.Piezas_codigo]]>
+	</queryString>
+	<field name="numero" class="java.lang.Integer"/>
+	<field name="fecha_remito" class="java.lang.String"/>
+	<field name="cantidad" class="java.lang.Integer"/>
+	<field name="Obras_numero" class="java.lang.Integer"/>
+	<field name="Obras_nombre" class="java.lang.String"/>
+	<field name="Obras_direccion" class="java.lang.String"/>
+	<field name="Obras_localidad" class="java.lang.String"/>
+	<field name="Obras_provincia" class="java.lang.String"/>
+	<field name="Edificio_nombre" class="java.lang.String"/>
+	<field name="Paquetes_numero" class="java.lang.Integer"/>
+	<field name="Paquetes_numero_revision" class="java.lang.Integer"/>
+	<field name="Paquetes_descripcion" class="java.lang.String"/>
+	<field name="Paquetes_fecha_fabricacion" class="java.lang.String"/>
+	<field name="Paquetes_fecha_despacho" class="java.lang.String"/>
+	<field name="Piezas_elemento" class="java.lang.String"/>
+	<field name="Piezas_correlatividad" class="java.lang.String"/>
+	<field name="Piezas_descripcion" class="java.lang.String"/>
+	<field name="Piezas_descripcion_extra" class="java.lang.String"/>
+	<field name="Piezas_largo" class="java.lang.Integer"/>
+	<field name="Piezas_pintura" class="java.lang.Boolean"/>
+	<field name="Piezas_color" class="java.lang.String"/>
+	<field name="Piezas_area" class="java.lang.String"/>
+	<field name="Piezas_codigo" class="java.lang.Integer"/>
+	<field name="Piezas_ubicacion" class="java.lang.String"/>
+	<field name="categoria" class="java.lang.String"/>
+	<field name="codigo" class="java.lang.Integer"/>
+	<field name="sumaPeso" class="java.math.BigDecimal"/>
+	<group name="Paquete">
+		<groupExpression><![CDATA[$F{Paquetes_numero}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<textField>
+					<reportElement uuid="68ba315f-c2d2-44b9-b23a-8c0b90cca33f" x="78" y="0" width="21" height="20"/>
+					<textElement verticalAlignment="Middle">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{Paquetes_numero}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement uuid="93ba3f6d-3a69-4626-883c-7bc450b38f28" x="0" y="0" width="78" height="20" forecolor="#666666"/>
+					<textElement verticalAlignment="Middle">
+						<font size="12" isBold="true" isItalic="true"/>
+					</textElement>
+					<text><![CDATA[N° de Lista]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="3c7bbf0f-5c42-428a-a615-374e71ec7c70" x="99" y="0" width="87" height="20" forecolor="#666666"/>
+					<textElement verticalAlignment="Middle">
+						<font size="12" isBold="true" isItalic="true"/>
+					</textElement>
+					<text><![CDATA[Descripción]]></text>
+				</staticText>
+				<textField>
+					<reportElement uuid="be9dd43c-afb4-40f0-b842-acd6257421e1" x="186" y="0" width="278" height="20"/>
+					<textElement verticalAlignment="Middle">
+						<font size="10"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{Paquetes_descripcion}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="Area">
+		<groupExpression><![CDATA[$F{Piezas_area}]]></groupExpression>
+		<groupHeader>
+			<band height="28">
+				<staticText>
+					<reportElement uuid="bb04d97d-6968-40d9-aab2-83544aa1c6db" style="Encabezado de columnas" mode="Transparent" x="327" y="14" width="42" height="14"/>
+					<textElement>
+						<font isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[Pintura]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="56d24db3-6463-40a0-b1fd-c204dee0f53b" style="Encabezado de columnas" mode="Transparent" x="438" y="14" width="44" height="14"/>
+					<textElement>
+						<font isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[Largo]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="222e2a95-e049-4300-841c-da9bc70be1ea" style="Encabezado de columnas" mode="Transparent" x="68" y="14" width="31" height="14"/>
+					<textElement>
+						<font isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[Corr.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="b7b2c61f-e28f-47ef-92cc-e53bd9a59ecf" style="Encabezado de columnas" mode="Transparent" x="626" y="14" width="50" height="14"/>
+					<textElement>
+						<font isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[Código]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="e212cf40-e581-4c71-8798-2d52e03d7379" style="Encabezado de columnas" mode="Transparent" x="36" y="14" width="32" height="14"/>
+					<textElement>
+						<font isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[Elem.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="c5e3f634-5f20-46bb-bc87-e25ff47cf267" style="Encabezado de columnas" mode="Transparent" x="99" y="14" width="87" height="14"/>
+					<textElement>
+						<font isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[Descripción]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="4ef828e2-4d00-436a-8ac9-f8c5a193d979" style="Encabezado de columnas" mode="Transparent" x="0" y="14" width="36" height="14"/>
+					<textElement>
+						<font isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[Cant.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="16022a57-abd9-4b3a-a91e-9e6486df4bac" style="Encabezado de columnas" mode="Transparent" x="369" y="14" width="69" height="14"/>
+					<textElement>
+						<font isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[Color]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="525df135-f469-4d8c-8107-417025a4d963" style="Encabezado de columnas" mode="Transparent" x="186" y="14" width="141" height="14"/>
+					<textElement>
+						<font isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[Descripción Extra]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="b4ebef42-d823-4dbf-8b3f-80c4ba41ea56" style="Encabezado de columnas" mode="Transparent" x="482" y="14" width="64" height="14"/>
+					<textElement>
+						<font isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[Peso]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="c19eaf4e-7b45-428a-ba46-da7dcab69e57" style="Encabezado de columnas" mode="Transparent" x="0" y="0" width="36" height="14"/>
+					<textElement>
+						<font isStrikeThrough="false"/>
+					</textElement>
+					<text><![CDATA[Área]]></text>
+				</staticText>
+				<textField>
+					<reportElement uuid="b31e3208-e8bb-4e9a-bd70-20676d71b389" x="36" y="0" width="63" height="14" backcolor="#FFFFFF"/>
+					<textElement verticalAlignment="Middle">
+						<font size="8" isStrikeThrough="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{Piezas_area}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement uuid="9cd394f3-be2f-4bc5-9a35-0dbe92022bae" x="676" y="14" width="70" height="14" forecolor="#666666"/>
+					<textElement>
+						<font isBold="true" isItalic="true"/>
+					</textElement>
+					<text><![CDATA[N° rem.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="11ac5242-b464-4092-9051-97e1a087991c" x="746" y="14" width="56" height="14" forecolor="#666666"/>
+					<textElement>
+						<font isBold="true" isItalic="true"/>
+					</textElement>
+					<text><![CDATA[Fec. rem.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="542aaa94-164f-4c3f-8c0e-48e27c6f39dc" x="546" y="14" width="80" height="14" forecolor="#666666"/>
+					<textElement>
+						<font isBold="true" isItalic="true"/>
+					</textElement>
+					<text><![CDATA[Categoría]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+	</group>
+	<detail>
+		<band height="11" splitType="Stretch">
+			<textField>
+				<reportElement uuid="5d80138b-947b-4ede-83ab-b39aa0aa8206" mode="Transparent" x="0" y="0" width="36" height="11" forecolor="#000000" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Center">
+					<font size="8" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="a9f467c9-eb2a-40a6-868f-4dab68bfb40a" x="68" y="0" width="31" height="11" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Center">
+					<font size="8" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Piezas_correlatividad}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="2e8710cd-2988-49ef-81ee-8276ccd21af8" x="186" y="0" width="141" height="11" backcolor="#FFFFFF"/>
+				<textElement>
+					<font size="8" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Piezas_descripcion_extra}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="f78f031f-293a-4dc7-8ef8-712c00d0ac29" x="369" y="0" width="69" height="11" backcolor="#FFFFFF"/>
+				<textElement>
+					<font size="8" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Piezas_color}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="bf354e08-f29c-4cae-8485-d3cc548446e8" x="626" y="0" width="50" height="11" backcolor="#FFFFFF"/>
+				<textElement>
+					<font size="8" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Piezas_codigo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="2f5a50aa-abf3-4476-af8b-00a655f7505b" x="438" y="0" width="44" height="11" backcolor="#FFFFFF"/>
+				<textElement>
+					<font size="8" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Piezas_largo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="97cb155c-5e9d-4a36-b691-a55228430173" x="36" y="0" width="32" height="11" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Center">
+					<font size="8" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Piezas_elemento}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="e72e836a-a807-428f-bfd7-cd35fae230f4" x="99" y="0" width="87" height="11" backcolor="#FFFFFF"/>
+				<textElement>
+					<font size="8" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Piezas_descripcion}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00000;-#,##0.00000">
+				<reportElement uuid="0cafda0f-41aa-4fe1-9c65-b441773dfd18" x="482" y="0" width="64" height="11" backcolor="#FFFFFF"/>
+				<textElement>
+					<font size="8" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{sumaPeso}.doubleValue()* $F{cantidad}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="863a2d9f-fab6-49d8-a80b-7f14a505214f" x="327" y="0" width="42" height="11" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Center">
+					<font size="8" isStrikeThrough="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Piezas_pintura}.equals( true )? "Si" :
+$F{Piezas_pintura}.equals( false )? "No" : ""]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="20d1d72c-1137-473c-aac7-f9ff94b51f48" x="676" y="0" width="70" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numero}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="f239f4d4-0132-4ba4-95c0-b223097c95d3" x="746" y="0" width="56" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fecha_remito}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="722856a3-bc32-4393-b446-8e0cd555ef0f" x="546" y="0" width="80" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{categoria}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

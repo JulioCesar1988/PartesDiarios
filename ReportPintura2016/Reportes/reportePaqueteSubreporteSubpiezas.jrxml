@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reportePaqueteSubreporteSubpiezas" language="groovy" pageWidth="802" pageHeight="555" orientation="Landscape" columnWidth="802" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="11e26b55-bc8d-41af-9f17-5969778a2b3d">
+	<property name="ireport.zoom" value="2.1435888100000016"/>
+	<property name="ireport.x" value="84"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="piezas_codigo" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[SELECT
+     COUNT(Subpiezas.codigo) as Cantidad,
+     Subpiezas."elemento" AS Subpiezas_elemento,
+     Subpiezas."correlatividad" AS Subpiezas_correlatividad,
+     Subpiezas."descripcion" AS Subpiezas_descripcion,
+     Subpiezas."ancho" AS Subpiezas_ancho,
+     Subpiezas."largo" AS Subpiezas_largo,
+     Subpiezas."peso" AS Subpiezas_peso,
+     Subpiezas."observaciones" AS Subpiezas_observaciones,
+     Materiales."tipo" AS Materiales_tipo,
+     Materiales."peso_especifico" AS Materiales_peso_especifico,
+     Materiales."espesor" AS Materiales_espesor,
+     Materiales."calidad" AS Materiales_calidad,
+     Piezas."codigo" AS Piezas_codigo
+FROM
+     "dbo"."Materiales" Materiales INNER JOIN "dbo"."Subpiezas" Subpiezas ON Materiales."id_material" = Subpiezas."id_material"
+     INNER JOIN "dbo"."Piezas" Piezas ON Subpiezas."id_pieza" = Piezas."id_pieza"
+WHERE
+     Piezas.codigo = $P{piezas_codigo}
+     and Piezas.activado = 1
+     and Subpiezas.activado = 1
+
+Group by Subpiezas.codigo,
+     Subpiezas."elemento" ,
+     Subpiezas."correlatividad" ,
+     Subpiezas."descripcion" ,
+     Subpiezas."ancho" ,
+     Subpiezas."largo" ,
+     Subpiezas."peso" ,
+     Subpiezas."observaciones" ,
+     Materiales."tipo" ,
+     Materiales."peso_especifico" ,
+     Materiales."espesor" ,
+     Materiales."calidad" ,
+     Piezas."codigo"]]>
+	</queryString>
+	<field name="Cantidad" class="java.lang.Integer"/>
+	<field name="Subpiezas_elemento" class="java.lang.String"/>
+	<field name="Subpiezas_correlatividad" class="java.lang.String"/>
+	<field name="Subpiezas_descripcion" class="java.lang.String"/>
+	<field name="Subpiezas_ancho" class="java.lang.Integer"/>
+	<field name="Subpiezas_largo" class="java.math.BigDecimal"/>
+	<field name="Subpiezas_peso" class="java.math.BigDecimal"/>
+	<field name="Subpiezas_observaciones" class="java.lang.String"/>
+	<field name="Materiales_tipo" class="java.lang.String"/>
+	<field name="Materiales_peso_especifico" class="java.math.BigDecimal"/>
+	<field name="Materiales_espesor" class="java.math.BigDecimal"/>
+	<field name="Materiales_calidad" class="java.lang.String"/>
+	<field name="Piezas_codigo" class="java.lang.Integer"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="13">
+			<staticText>
+				<reportElement uuid="d6f78664-4114-47e5-bdb2-997949e87243" x="577" y="0" width="57" height="13"/>
+				<textElement>
+					<font size="9" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Peso Unit.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="7c3c312d-0871-4c96-9b31-b8049bf3605c" x="157" y="0" width="42" height="13"/>
+				<textElement>
+					<font size="9" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Cantidad]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="b95da46f-4fe8-425a-8bf9-829d7fd2412d" x="335" y="0" width="94" height="13"/>
+				<textElement>
+					<font size="9" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Material]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="8057b7db-017e-4a86-bab8-638ad5a3623e" x="199" y="0" width="136" height="13"/>
+				<textElement>
+					<font size="9" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Descripción]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="9402ddd6-704b-4f4b-94b6-9330570171be" x="634" y="0" width="133" height="13"/>
+				<textElement>
+					<font size="9" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Observaciones]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="e4f749c7-c0d4-470d-9dde-f1bda2584f6c" x="475" y="0" width="46" height="13"/>
+				<textElement>
+					<font size="9" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Calidad]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c8d140e7-a904-4937-8a01-43aa9bff4997" x="114" y="0" width="43" height="13"/>
+				<textElement>
+					<font size="9" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Corr.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a224f8b7-8474-47b4-b254-c718372f1375" x="67" y="0" width="47" height="13"/>
+				<textElement>
+					<font size="9" isBold="true" isItalic="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Posición]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="0e902e42-38fa-4255-b5c0-ef8cc25767c5" x="521" y="0" width="56" height="13"/>
+				<textElement>
+					<font size="9" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Largo/Área]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="439b55e0-711f-49e1-ac70-767bd7ebe017" x="429" y="0" width="46" height="13"/>
+				<textElement>
+					<font size="9" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Espesor]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="dc11a732-00c3-40d8-aa67-02b49c1e8b16" x="0" y="0" width="67" height="13"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Subpiezas]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="11" splitType="Stretch">
+			<textField>
+				<reportElement uuid="ec7015bc-d1c5-4b3d-af17-41d313b556f2" x="67" y="0" width="47" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Subpiezas_elemento}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="616ba7a1-ee4f-43d6-a6e2-ad6451b3f9eb" x="114" y="0" width="43" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Subpiezas_correlatividad}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="cd6c33dd-5a24-4e48-9bba-6cbbcd05908e" x="157" y="0" width="42" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Cantidad}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="7356c694-3fa0-4e42-b88f-25b15e52c8f8" x="199" y="0" width="136" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Subpiezas_descripcion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="83924287-fff9-4fc9-bf1b-5e1339555381" x="335" y="0" width="94" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Materiales_tipo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="33561af6-4fa1-45ba-a28f-272548028564" x="429" y="0" width="46" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Materiales_espesor}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="777d932d-e70f-48df-8502-48216ce6db5d" x="475" y="0" width="46" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Materiales_calidad}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="dd9621c6-e450-4df0-9d42-1e58278eddfa" x="521" y="0" width="45" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Subpiezas_largo}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.0000;-###0.0000">
+				<reportElement uuid="e94d6910-602a-49df-85eb-8150f201adec" x="577" y="0" width="57" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Subpiezas_peso}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="c963dfc3-01ee-4a18-803c-c10d57791847" x="634" y="0" width="133" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Subpiezas_observaciones}.equals( null )? "" : $F{Subpiezas_observaciones}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement uuid="fea06e77-7b22-40cf-b269-fa8dc5e1404d" x="67" y="10" width="683" height="1"/>
+			</line>
+		</band>
+	</detail>
+</jasperReport>

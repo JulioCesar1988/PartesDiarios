@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteRemito" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="1eecc356-967b-49c7-9b09-87e3a8f3c4df">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="11" splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band height="102" splitType="Stretch">
+			<frame>
+				<reportElement uuid="59484c7b-7c0a-4113-84ef-9cde6165d9c1" x="0" y="0" width="555" height="102"/>
+				<rectangle>
+					<reportElement uuid="3655b042-0738-46d0-821a-b84b4a554b52" x="225" y="0" width="330" height="102"/>
+				</rectangle>
+				<rectangle>
+					<reportElement uuid="e6dc8819-9d74-48f5-b681-fa19e1d214a2" x="0" y="0" width="225" height="102"/>
+				</rectangle>
+				<rectangle>
+					<reportElement uuid="1056d8d7-580b-45cc-885f-3001709e5e43" x="225" y="0" width="106" height="20"/>
+				</rectangle>
+				<staticText>
+					<reportElement uuid="d2489697-1ffc-45a7-9699-11613f6c6381" x="225" y="0" width="100" height="20"/>
+					<textElement/>
+					<text><![CDATA[Remito]]></text>
+				</staticText>
+			</frame>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="61" splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="125" splitType="Stretch"/>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteMateriales" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="22098d64-bc15-4496-b442-d80e611b8a87">
+	<property name="ireport.zoom" value="1.3310000000000006"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<style name="Fila" fontName="Verdana" fontSize="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Header Header" mode="Transparent" forecolor="#000000" backcolor="#0000CC" fill="Solid" fontName="DejaVu Sans" fontSize="10" isBold="true"/>
+	<style name="Titulo" mode="Transparent" forecolor="#000000" backcolor="#000000" fontSize="22" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<parameter name="filtroTipo" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="orden" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[declare @tipo varchar(50);
+set @tipo = (select distinct Materiales.tipo from Materiales where Materiales.tipo=$P{filtroTipo})
+
+select Materiales.codigo, Materiales.tipo, Materiales.peso_especifico, Materiales.espesor, Materiales.calidad, Materiales.unidad_peso, Materiales.ancho
+from Materiales
+where Materiales.activado=1
+and (Materiales.tipo = @tipo or @tipo is null)
+ORDER BY
+  CASE
+  WHEN $P{orden} = 1 THEN CAST(Materiales.codigo AS sql_variant)
+  WHEN $P{orden} = 2 THEN CAST(Materiales.tipo as varchar)+' '+CAST(Materiales.codigo AS varchar)
+  WHEN $P{orden} = 3 THEN Materiales.peso_especifico
+  WHEN $P{orden} = 4 THEN Materiales.espesor
+  WHEN $P{orden} = 5 THEN CAST(Materiales.calidad AS varchar)+' '+CAST(Materiales.codigo AS varchar)
+  ELSE NULL
+  END;]]>
+	</queryString>
+	<field name="codigo" class="java.lang.String"/>
+	<field name="tipo" class="java.lang.String"/>
+	<field name="peso_especifico" class="java.math.BigDecimal"/>
+	<field name="espesor" class="java.math.BigDecimal"/>
+	<field name="calidad" class="java.lang.String"/>
+	<field name="unidad_peso" class="java.lang.String"/>
+	<field name="ancho" class="java.lang.Integer"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="69" splitType="Stretch">
+			<image>
+				<reportElement uuid="3f74b9da-3aac-4dc8-b825-141958652268" style="Titulo" x="0" y="0" width="61" height="63"/>
+				<imageExpression><![CDATA["Reportes/logo01.jpg"]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement uuid="bd675c9b-2f32-4e58-96ae-c82a36a7a709" style="Titulo" x="61" y="0" width="234" height="29"/>
+				<textElement/>
+				<text><![CDATA[Reporte de materiales]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement uuid="a41327c7-55b5-41aa-8267-68601135877c" style="Titulo" x="0" y="0" width="361" height="63"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="ca5945e7-5cb3-4a71-8961-125f7487d59f" style="Titulo" x="361" y="0" width="194" height="63"/>
+			</rectangle>
+			<textField>
+				<reportElement uuid="3f51a80a-dfbd-4b0e-a627-46eee48404f4" x="365" y="0" width="183" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["Filtro de tipo: " + $P{filtroTipo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="68651646-96e6-4432-bb99-9fc101d274bf" x="365" y="20" width="183" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["Odenado por: " + (
+    $P{orden}.equals(1) ? "Código" :
+$P{orden}.equals(2)? "Tipo, código" :
+$P{orden}.equals(3)? "Peso específico" :
+$P{orden}.equals(4)? "Espesor" :
+$P{orden}.equals(5)? "Calidad, Materiales" : ""
+
+    )]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="14" splitType="Stretch">
+			<frame>
+				<reportElement uuid="1fdcf935-33e7-4a4c-aef6-4582652f074c" x="0" y="0" width="555" height="14"/>
+				<staticText>
+					<reportElement uuid="3194bd95-d011-4837-971f-e10bce3eb45b" style="Header Header" x="8" y="0" width="124" height="14"/>
+					<textElement/>
+					<text><![CDATA[Código]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="dd514fab-cb34-4355-9f13-12e902a234f9" style="Header Header" x="132" y="0" width="83" height="14"/>
+					<textElement/>
+					<text><![CDATA[Tipo]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="5c9b7615-a31b-4508-bd48-7711c4c11d4e" style="Header Header" x="215" y="0" width="108" height="14"/>
+					<textElement/>
+					<text><![CDATA[Calidad]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="44a3fced-f6f5-4b81-98c6-bea283e3b769" style="Header Header" x="313" y="0" width="74" height="14"/>
+					<textElement/>
+					<text><![CDATA[Espesor]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="8e01a38c-47f1-4c39-b489-021d0484019b" style="Header Header" x="461" y="0" width="72" height="14"/>
+					<textElement/>
+					<text><![CDATA[Peso específico]]></text>
+				</staticText>
+				<line>
+					<reportElement uuid="84f700c7-f7f6-41e1-b812-d7cf676a5864" x="0" y="12" width="555" height="1"/>
+				</line>
+				<staticText>
+					<reportElement uuid="2ab4f721-c72b-4dc8-91e8-aa9a7656db3a" style="Header Header" x="387" y="0" width="74" height="12"/>
+					<textElement/>
+					<text><![CDATA[Ancho]]></text>
+				</staticText>
+			</frame>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<frame>
+				<reportElement uuid="6538e007-ec4a-41ca-8d1e-7e36d1838f0e" style="Fila" isPrintRepeatedValues="false" x="0" y="0" width="555" height="13"/>
+				<textField>
+					<reportElement uuid="e584ac9b-5f01-44dc-a9fe-dd09bacab0cd" style="Header Header" x="8" y="0" width="124" height="12"/>
+					<textElement>
+						<font size="9" isBold="false" isItalic="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{codigo}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement uuid="d7719256-20f9-4f3e-afbd-27caa1b37ecf" style="Header Header" x="470" y="0" width="85" height="12"/>
+					<textElement>
+						<font size="9" isBold="false" isItalic="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{peso_especifico} +' '+$F{unidad_peso}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement uuid="66e672e5-5629-462d-8b1f-1cbc6b9f7fb2" style="Header Header" x="219" y="0" width="94" height="12"/>
+					<textElement>
+						<font size="9" isBold="false" isItalic="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{calidad}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement uuid="97a8cf82-5832-47a6-8a6b-26a129ee67bb" style="Header Header" x="319" y="0" width="68" height="12"/>
+					<textElement>
+						<font size="9" isBold="false" isItalic="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{espesor}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement uuid="63c5b8f4-0f19-4258-84dc-e25085a01f17" style="Header Header" x="392" y="0" width="69" height="12"/>
+					<textElement>
+						<font isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{ancho}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement uuid="c24058fb-bc79-4749-8f6c-8d3d8aa1700f" style="Header Header" x="137" y="0" width="78" height="12"/>
+					<textElement>
+						<font size="9" isBold="false" isItalic="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{tipo}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="20" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="20" splitType="Stretch">
+			<rectangle>
+				<reportElement uuid="1f1e18e4-787c-4fb2-82c2-08f6a4cf285e" mode="Transparent" x="0" y="0" width="555" height="20"/>
+			</rectangle>
+			<textField evaluationTime="Report">
+				<reportElement uuid="f6d5b7bb-85a0-4feb-8087-3b247c1ff3a4" mode="Transparent" x="511" y="0" width="40" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="0a2821b2-7275-4231-a674-fab11428a862" x="431" y="0" width="80" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Pag. "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="41" splitType="Stretch"/>
+	</summary>
+</jasperReport>

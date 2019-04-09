@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reportRecordatorioPlantaVersion02" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="f2709575-a92c-4f0f-9e9d-8f2c380865c4">
+	<property name="ireport.zoom" value="1.3310000000000004"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<queryString>
+		<![CDATA[select obras.numero			 as numeroObra ,
+       paquetes.numero		 as numeroPaquete,
+       piezas.id_pieza		 as IdPieza,
+       piezas.correlatividad as correlatividad,
+       piezas.elemento		 as elemento,
+       subpiezas.id_subpieza as idSubpieza,
+       tareas.codigo		 as codigoTarea ,
+       tareas.descripcion	 as descripcionTarea,
+       subpiezas_tareas.estado  as estadoTarea,
+        subpiezas_tareas.fecha_finalizado    as fechaFinalizado ,
+        piezas.descripcion as descripcionPieza,
+        subpiezas.elemento as elementoSubpieza,
+        subpiezas.correlatividad as correlatividadSubpieza,
+        subpiezas.codigo as codigoSubpiza ,
+        materiales.tipo as tipoMaterial ,
+        materiales.espesor as espesorMaterial,
+        materiales.codigo as codigoMaterial
+
+
+from Obras inner join paquetes on (obras.id_obra = paquetes.id_obra)
+           inner join piezas on (piezas.id_paquete = paquetes.id_paquete)
+           inner join subpiezas on (piezas.id_pieza = subpiezas.id_pieza)
+           inner join subpiezas_tareas on (subpiezas_tareas.id_subpieza = subpiezas.id_subpieza)
+           inner join tareas  on (subpiezas_tareas.id_tarea = tareas.id_tarea)
+           inner join materiales on (subpiezas.id_material = materiales.id_material)
+where obras.activado      = 1  and
+      paquetes.activado   = 1  and
+      piezas.activado     = 1  and
+      subpiezas.activado = 1 and
+      subpiezas_Tareas.activado = 1 and
+      tareas.activado =  1 and
+      obras.numero = 538 and
+      paquetes.numero = 16 and
+      piezas.correlatividad = '3' and piezas.elemento = 'VSOL'
+
+group by   obras.numero ,
+           paquetes.numero,
+           piezas.correlatividad,
+           piezas.elemento ,
+           subpiezas.id_subpieza,
+           piezas.id_pieza ,
+           tareas.codigo ,
+           tareas.descripcion,
+           subpiezas_tareas.estado,
+           subpiezas_tareas.fecha_finalizado ,
+           piezas.descripcion ,
+           subpiezas.elemento ,
+           subpiezas.correlatividad ,
+           subpiezas.codigo,
+           materiales.tipo ,
+           materiales.espesor ,
+           materiales.codigo]]>
+	</queryString>
+	<field name="numeroObra" class="java.lang.Integer"/>
+	<field name="numeroPaquete" class="java.lang.Integer"/>
+	<field name="IdPieza" class="java.lang.Integer"/>
+	<field name="correlatividad" class="java.lang.String"/>
+	<field name="elemento" class="java.lang.String"/>
+	<field name="idSubpieza" class="java.lang.Integer"/>
+	<field name="codigoTarea" class="java.lang.String"/>
+	<field name="descripcionTarea" class="java.lang.String"/>
+	<field name="estadoTarea" class="java.lang.String"/>
+	<field name="fechaFinalizado" class="java.sql.Timestamp"/>
+	<field name="descripcionPieza" class="java.lang.String"/>
+	<field name="elementoSubpieza" class="java.lang.String"/>
+	<field name="correlatividadSubpieza" class="java.lang.String"/>
+	<field name="codigoSubpiza" class="java.lang.Integer"/>
+	<field name="tipoMaterial" class="java.lang.String"/>
+	<field name="espesorMaterial" class="java.math.BigDecimal"/>
+	<field name="codigoMaterial" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="23" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="100" height="20" uuid="096ff949-f281-448f-b96d-2792721ff5a6"/>
+				<text><![CDATA[numeroPaquete]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="100" y="0" width="100" height="20" uuid="afe66ee9-6ed2-439e-8046-6795507da9a4"/>
+				<text><![CDATA[posicion]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="300" y="0" width="100" height="20" uuid="be1b793e-c43f-4e10-92ed-99e7a1b2265f"/>
+				<text><![CDATA[descripcionTarea]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="407" y="1" width="100" height="20" uuid="6fd77a0c-43bf-4e9e-8312-8a9baa7a0283"/>
+				<text><![CDATA[Material]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="25" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="100" height="20" uuid="9a91370a-d78d-4791-b615-55bfe7a03dc4"/>
+				<textFieldExpression><![CDATA[$F{numeroPaquete}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="100" y="0" width="100" height="20" uuid="d417f457-f6c5-4f26-a216-393a0c49339d"/>
+				<textFieldExpression><![CDATA[$F{elemento}+$F{correlatividad}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="300" y="0" width="100" height="20" uuid="a070ba46-ae08-49b5-a559-8f19a54bdf83"/>
+				<textFieldExpression><![CDATA[$F{descripcionTarea}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="407" y="3" width="100" height="20" uuid="940347f9-7311-4801-bbfa-a691d64c6a78"/>
+				<textFieldExpression><![CDATA[$F{tipoMaterial}+$F{espesorMaterial}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

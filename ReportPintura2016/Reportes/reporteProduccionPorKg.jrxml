@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteProduccionPorKg" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="6f8051a6-d84e-46de-b9fc-8b2feb238cfe">
+	<property name="ireport.zoom" value="1.1000000000000005"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="obraNumero" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[440]]></defaultValueExpression>
+	</parameter>
+	<parameter name="desde" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="hasta" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="obraNombre" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="todasLasObras" class="java.lang.Boolean">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="subcategorias" class="java.lang.Boolean">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="incluyeNoPintadas" class="java.lang.Boolean">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="noPintadasDesde" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[declare @obra int
+declare @desde date
+declare @hasta date
+declare @noPintadasDesde date
+declare @noPintadasHasta date
+declare @subcategorias bit
+declare @todasLasObras bit
+declare @incluyeNoPintadas bit
+set @obra = $P{obraNumero}
+set @desde =$P{desde}
+set @hasta =$P{hasta}
+set @todasLasObras=$P{todasLasObras}
+set @subcategorias=$P{subcategorias}
+set @incluyeNoPintadas=$P{incluyeNoPintadas}
+set @noPintadasDesde =$P{noPintadasDesde}
+set @noPintadasHasta =$P{hasta}
+
+
+if @incluyeNoPintadas=1
+begin
+/************** Aca vienen todas las piezas que no tienen tareas pendientes indistintamente si sueron pintadas o no*/
+	if @subcategorias=0
+	begin
+	/***********Esta parte hace unaagrupacion solo por categoria*/
+	select
+		Categoria_Ctrl_Produccion.categoria, Categoria_Ctrl_Produccion.codigo,
+		COUNT (distinct (Piezas.id_pieza)) as piezaCantidad,
+		cast ((Sum(Subpiezas.peso) ) as decimal (15, 3)) as piezasPeso
+		from Obras
+		inner join Paquetes
+		inner join Piezas
+		inner join Subpiezas
+		on Piezas.id_pieza=Subpiezas.id_pieza
+		on Paquetes.id_paquete=Piezas.id_paquete
+		on Obras.id_obra=Paquetes.id_obra
+		left join Categoria_Ctrl_Produccion on Piezas.id_categoria=Categoria_Ctrl_Produccion.id_categoria
+		inner join
+
+		(			select Subpiezas.id_subpieza, MAX(Subpiezas_Tareas.fecha_finalizado) as ultimaTarea from Obras
+					inner join Paquetes
+					inner join Piezas
+					inner join Subpiezas
+					inner join Subpiezas_Tareas
+					on Subpiezas.id_subpieza=Subpiezas_Tareas.id_subpieza
+					on Piezas.id_pieza=Subpiezas.id_pieza
+					on Paquetes.id_paquete=Piezas.id_paquete
+					on Obras.id_obra=Paquetes.id_obra
+					where (Obras.numero=@obra or @todasLasObras=1)
+					and Subpiezas_Tareas.fecha_finalizado is not null
+					and piezas.id_pieza not in (
+							select piezas.id_pieza from Obras
+							inner join Paquetes
+							inner join Piezas
+							inner join Subpiezas
+							inner join Subpiezas_Tareas
+							on Subpiezas.id_subpieza=Subpiezas_Tareas.id_subpieza
+							on Piezas.id_pieza=Subpiezas.id_pieza
+							on Paquetes.id_paquete=Piezas.id_paquete
+							on Obras.id_obra=Paquetes.id_obra
+							where (Obras.numero=@obra or @todasLasObras=1)
+							and Subpiezas_Tareas.fecha_finalizado is null)
+					group by Subpiezas.id_subpieza
+		) as AuxFechas
+		on Subpiezas.id_subpieza=AuxFechas.id_subpieza
+		where
+		(Obras.numero=@obra or @todasLasObras=1)
+		and ((piezas.finalizado=1) or ((piezas.finalizado=0)/*and(AuxFechas.ultimaTarea between @noPintadasDesde and @noPintadasHasta)*/))
+		and ((Piezas.fecha_aprovacion_finalizacion between @desde and @hasta) or (Piezas.finalizado=0)
+			/*or
+						(Piezas.id_pieza in
+						(SELECT distinct(Piezas.id_pieza ) FROM Piezas
+						inner join Subpiezas
+						on Piezas.id_pieza=Subpiezas.id_pieza
+						where
+						Piezas.activado=1
+						and Piezas.pintura=1
+						and Piezas.finalizado=0
+						and Piezas.fecha_aprovacion_finalizacion is null
+						and	piezas.id_pieza not in
+												(select piezas.id_pieza from Obras
+												inner join Paquetes
+												inner join Piezas
+												inner join Subpiezas
+												inner join Subpiezas_Tareas
+												on Subpiezas.id_subpieza=Subpiezas_Tareas.id_subpieza
+												on Piezas.id_pieza=Subpiezas.id_pieza
+												on Paquetes.id_paquete=Piezas.id_paquete
+												on Obras.id_obra=Paquetes.id_obra
+												where (Obras.numero=@obra or @todasLasObras=1)
+												and piezas.activado=1
+												and Subpiezas_Tareas.fecha_finalizado is null
+												)
+						)
+
+			)*/
+		)
+		and Paquetes.activado=1
+		and Piezas.activado=1
+		and Subpiezas.activado=1
+
+		group by
+		Categoria_Ctrl_Produccion.categoria, Categoria_Ctrl_Produccion.codigo
+		order by Categoria_Ctrl_Produccion.categoria
+	end
+	else
+	begin
+		/***********Esta parte hace una agrupacion por categoria y subcategoria*/
+		Select
+		Categoria_Ctrl_Produccion.categoria +
+		CASE
+			 WHEN (Categoria_Ctrl_Produccion.subcategoria is NULL
+					or Categoria_Ctrl_Produccion.subcategoria='' ) THEN ''
+			 ELSE ' - '+Categoria_Ctrl_Produccion.subcategoria END as categoria,
+		Categoria_Ctrl_Produccion.codigo +
+		CASE
+			 WHEN (Categoria_Ctrl_Produccion.codigo_subcategoria is NULL
+					or Categoria_Ctrl_Produccion.codigo_subcategoria='' ) THEN ''
+			 ELSE ' - '+Categoria_Ctrl_Produccion.codigo_subcategoria END as codigo,
+		COUNT (distinct (Piezas.id_pieza)) as piezaCantidad,
+		cast ((Sum(Subpiezas.peso) ) as decimal (15, 3)) as piezasPeso
+		from Obras
+		inner join Paquetes
+		inner join Piezas
+		inner join Subpiezas
+		on Piezas.id_pieza=Subpiezas.id_pieza
+		on Paquetes.id_paquete=Piezas.id_paquete
+		on Obras.id_obra=Paquetes.id_obra
+		left join Categoria_Ctrl_Produccion on Piezas.id_categoria=Categoria_Ctrl_Produccion.id_categoria
+		inner join
+
+		(			select Subpiezas.id_subpieza, MAX(Subpiezas_Tareas.fecha_finalizado) as ultimaTarea from Obras
+					inner join Paquetes
+					inner join Piezas
+					inner join Subpiezas
+					inner join Subpiezas_Tareas
+					on Subpiezas.id_subpieza=Subpiezas_Tareas.id_subpieza
+					on Piezas.id_pieza=Subpiezas.id_pieza
+					on Paquetes.id_paquete=Piezas.id_paquete
+					on Obras.id_obra=Paquetes.id_obra
+					where (Obras.numero=@obra or @todasLasObras=1)
+					and Subpiezas_Tareas.fecha_finalizado is not null
+					and piezas.id_pieza not in (
+							select piezas.id_pieza from Obras
+							inner join Paquetes
+							inner join Piezas
+							inner join Subpiezas
+							inner join Subpiezas_Tareas
+							on Subpiezas.id_subpieza=Subpiezas_Tareas.id_subpieza
+							on Piezas.id_pieza=Subpiezas.id_pieza
+							on Paquetes.id_paquete=Piezas.id_paquete
+							on Obras.id_obra=Paquetes.id_obra
+							where (Obras.numero=@obra or @todasLasObras=1)
+							and Subpiezas_Tareas.fecha_finalizado is null)
+					group by Subpiezas.id_subpieza
+		) as AuxFechas
+		on Subpiezas.id_subpieza=AuxFechas.id_subpieza
+		where
+		(Obras.numero=@obra or @todasLasObras=1)
+		and ((piezas.finalizado=1) or ((piezas.finalizado=0)/*and(AuxFechas.ultimaTarea between @noPintadasDesde and @noPintadasHasta)*/))
+		and ((Piezas.fecha_aprovacion_finalizacion between @desde and @hasta) or (Piezas.finalizado=0)
+			/*or
+						(Piezas.id_pieza in
+						(SELECT distinct(Piezas.id_pieza ) FROM Piezas
+						inner join Subpiezas
+						on Piezas.id_pieza=Subpiezas.id_pieza
+						where
+						Piezas.activado=1
+						and Piezas.pintura=1
+						and Piezas.finalizado=0
+						and Piezas.fecha_aprovacion_finalizacion is null
+						and	piezas.id_pieza not in
+												(select piezas.id_pieza from Obras
+												inner join Paquetes
+												inner join Piezas
+												inner join Subpiezas
+												inner join Subpiezas_Tareas
+												on Subpiezas.id_subpieza=Subpiezas_Tareas.id_subpieza
+												on Piezas.id_pieza=Subpiezas.id_pieza
+												on Paquetes.id_paquete=Piezas.id_paquete
+												on Obras.id_obra=Paquetes.id_obra
+												where (Obras.numero=@obra or @todasLasObras=1)
+												and piezas.activado=1
+												and Subpiezas_Tareas.fecha_finalizado is null
+												)
+						)
+
+			)*/
+		)
+		and Paquetes.activado=1
+		and Piezas.activado=1
+		and Subpiezas.activado=1
+		group by Categoria_Ctrl_Produccion.categoria, Categoria_Ctrl_Produccion.codigo,
+		Categoria_Ctrl_Produccion.subcategoria, Categoria_Ctrl_Produccion.codigo_subcategoria
+		order by Categoria_Ctrl_Produccion.categoria, Categoria_Ctrl_Produccion.subcategoria
+	end
+end
+
+else
+begin
+	if @subcategorias=0
+	begin
+		/***********Esta parte hace unaagrupacion solo por categoria*/
+		select
+		Categoria_Ctrl_Produccion.categoria, Categoria_Ctrl_Produccion.codigo,
+		COUNT (distinct (Piezas.id_pieza)) as piezaCantidad,
+		cast ((Sum(Subpiezas.peso) ) as decimal (15, 3)) as piezasPeso
+		from Obras
+		inner join Paquetes
+		inner join Piezas
+		inner join Subpiezas
+		on Piezas.id_pieza=Subpiezas.id_pieza
+		on Paquetes.id_paquete=Piezas.id_paquete
+		on Obras.id_obra=Paquetes.id_obra
+		left join Categoria_Ctrl_Produccion on Piezas.id_categoria=Categoria_Ctrl_Produccion.id_categoria
+		where
+		(Obras.numero=@obra or @todasLasObras=1)
+
+		and Piezas.fecha_aprovacion_finalizacion between @desde and @hasta
+		and Paquetes.activado=1
+		and Piezas.activado=1
+		and Subpiezas.activado=1
+		group by
+		Categoria_Ctrl_Produccion.categoria, Categoria_Ctrl_Produccion.codigo
+		order by Categoria_Ctrl_Produccion.categoria
+	end
+	else
+	begin
+		/***********Esta parte hace una agrupacion por categoria y subcategoria*/
+		Select
+		Categoria_Ctrl_Produccion.categoria +
+		CASE
+			 WHEN (Categoria_Ctrl_Produccion.subcategoria is NULL
+					or Categoria_Ctrl_Produccion.subcategoria='' ) THEN ''
+			 ELSE ' - '+Categoria_Ctrl_Produccion.subcategoria END as categoria,
+		Categoria_Ctrl_Produccion.codigo +
+		CASE
+			 WHEN (Categoria_Ctrl_Produccion.codigo_subcategoria is NULL
+					or Categoria_Ctrl_Produccion.codigo_subcategoria='' ) THEN ''
+			 ELSE ' - '+Categoria_Ctrl_Produccion.codigo_subcategoria END as codigo,
+
+		COUNT (distinct (Piezas.id_pieza)) as piezaCantidad,
+		cast ((Sum(Subpiezas.peso) ) as decimal (15, 3)) as piezasPeso
+		from Obras
+		inner join Paquetes
+		inner join Piezas
+		inner join Subpiezas
+		on Piezas.id_pieza=Subpiezas.id_pieza
+		on Paquetes.id_paquete=Piezas.id_paquete
+		on Obras.id_obra=Paquetes.id_obra
+		left join Categoria_Ctrl_Produccion on Piezas.id_categoria=Categoria_Ctrl_Produccion.id_categoria
+
+
+		where @subcategorias=1
+		and @incluyeNoPintadas=0
+		and (Obras.numero=@obra or @todasLasObras=1)
+
+		and Piezas.fecha_aprovacion_finalizacion between @desde and @hasta
+		and Paquetes.activado=1
+		and Piezas.activado=1
+		and Subpiezas.activado=1
+
+		group by Categoria_Ctrl_Produccion.categoria, Categoria_Ctrl_Produccion.codigo,
+		Categoria_Ctrl_Produccion.subcategoria, Categoria_Ctrl_Produccion.codigo_subcategoria
+		order by Categoria_Ctrl_Produccion.categoria
+	end
+end]]>
+	</queryString>
+	<field name="categoria" class="java.lang.String"/>
+	<field name="codigo" class="java.lang.String"/>
+	<field name="piezaCantidad" class="java.lang.Integer"/>
+	<field name="piezasPeso" class="java.math.BigDecimal"/>
+	<variable name="totalKg" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{piezasPeso}]]></variableExpression>
+	</variable>
+	<variable name="totalUnidades" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{piezaCantidad}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="55" splitType="Stretch">
+			<textField>
+				<reportElement x="32" y="20" width="476" height="16" uuid="566f0aea-16c0-450e-9498-618d83780591"/>
+				<textFieldExpression><![CDATA[$P{todasLasObras}.equals( true )? " Todas las obras" : ("Obra: " + $P{obraNumero} +" - "+ $P{obraNombre})]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="32" y="40" width="103" height="15" uuid="2a5f9977-8185-4995-97de-a4927008e3e7"/>
+				<textElement>
+					<font isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Categoría]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="232" y="40" width="65" height="15" uuid="24cd0f2c-0912-4eae-b569-c1109ca3f81d"/>
+				<textElement>
+					<font isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Cantidades]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="346" y="40" width="100" height="15" uuid="32541caa-1cdd-4889-94c0-7c6661ebc399"/>
+				<textElement>
+					<font isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Peso]]></text>
+			</staticText>
+			<line>
+				<reportElement x="32" y="54" width="770" height="1" uuid="877040d5-36f2-44d6-a57d-28fb4492c6a9"/>
+			</line>
+			<textField>
+				<reportElement x="248" y="0" width="316" height="20" uuid="6b29d071-ecc2-4bd1-82a6-6107781f998a"/>
+				<textElement>
+					<font size="12" isBold="true" isUnderline="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Infome de Producción ("+$P{desde}+" al "+$P{hasta}+")"]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="681" y="40" width="121" height="14" uuid="d33f4c7a-59b6-47fe-94f6-2d317f6cdd60"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="591" y="40" width="90" height="14" uuid="025ee5c2-841a-46ae-9547-e805f017d562"/>
+				<textElement>
+					<font isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Fecha de impresión]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="591" y="20" width="211" height="20" uuid="2d2498d5-d089-491a-8f75-c5f91783707d"/>
+				<textElement>
+					<font isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{incluyeNoPintadas}.equals( true )? "Incluye piezas finalizadas y no pintadas" : ("Solo piezas completamente finalizadas")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="135" y="40" width="58" height="15" uuid="7aa610dd-6695-474c-8500-3438a35cfcfc"/>
+				<textElement>
+					<font isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Código]]></text>
+			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band height="14">
+			<textField>
+				<reportElement x="32" y="0" width="103" height="14" uuid="cb7be6f8-7950-4b55-9d37-445918d7d74f"/>
+				<textFieldExpression><![CDATA[($F{categoria}.equals(null)? "Sin categoria" : $F{categoria})]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="32" y="13" width="770" height="1" uuid="d39dd30e-769a-4baa-ae40-f511e7b4632b"/>
+			</line>
+			<textField>
+				<reportElement x="232" y="0" width="65" height="14" uuid="43c22583-3488-4ef0-b00e-bd095678f6c0"/>
+				<textFieldExpression><![CDATA[$F{piezaCantidad} + " unid."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="346" y="0" width="100" height="14" uuid="1cdfba70-5ff2-4fc6-b0e5-420b3499c080"/>
+				<textFieldExpression><![CDATA[$F{piezasPeso} + " Kg"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="135" y="0" width="58" height="14" uuid="45d52701-1838-4657-832a-1f682a9c5a5b"/>
+				<textFieldExpression><![CDATA[($F{codigo}.equals(null)? "S/Cat." : $F{codigo})]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="299" splitType="Stretch">
+			<pie3DChart>
+				<chart>
+					<reportElement x="32" y="23" width="388" height="276" uuid="7de99a8f-41a5-4144-8937-5bd154929a4a"/>
+					<chartTitle/>
+					<chartSubtitle/>
+					<chartLegend/>
+				</chart>
+				<pieDataset>
+					<keyExpression><![CDATA[($F{categoria}.equals( null )? "Sin categoria" : $F{categoria})]]></keyExpression>
+					<valueExpression><![CDATA[$F{piezasPeso}]]></valueExpression>
+					<labelExpression><![CDATA[($F{codigo}.equals( null )? "S/Cat." : $F{codigo}) +" - " + $F{piezasPeso} + " Kg."]]></labelExpression>
+				</pieDataset>
+				<pie3DPlot>
+					<plot/>
+					<itemLabel/>
+				</pie3DPlot>
+			</pie3DChart>
+			<pie3DChart>
+				<chart>
+					<reportElement x="420" y="23" width="382" height="276" uuid="70b22497-b814-45a7-b84f-8e338399eaf5"/>
+					<chartTitle/>
+					<chartSubtitle/>
+					<chartLegend/>
+				</chart>
+				<pieDataset>
+					<keyExpression><![CDATA[($F{categoria}.equals( null )? "Sin categoria" : $F{categoria})]]></keyExpression>
+					<valueExpression><![CDATA[$F{piezaCantidad}]]></valueExpression>
+					<labelExpression><![CDATA[($F{codigo}.equals( null )? "S/Cat." : $F{codigo}) + " - "+ $F{piezaCantidad} + " Unid."]]></labelExpression>
+				</pieDataset>
+				<pie3DPlot>
+					<plot/>
+					<itemLabel/>
+				</pie3DPlot>
+			</pie3DChart>
+			<textField>
+				<reportElement x="322" y="0" width="128" height="16" uuid="b1e3afaa-78b7-4efd-bf75-cc40e4dad9c2"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Total: " + $V{totalKg} + " Kg."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="207" y="0" width="115" height="16" uuid="cd062abd-fecb-4bf4-89fe-366b5ef0c767"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Total: " + $V{totalUnidades} + " Unid."]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

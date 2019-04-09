@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reportePaquete" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="39ce6051-54f5-4e46-a309-e31c1d802cd7">
+	<property name="ireport.zoom" value="1.2100000000000095"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="SubTitle" forecolor="#736343" fontName="Arial" fontSize="18"/>
+	<style name="Column header" forecolor="#666666" fontSize="10" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Detail" fontName="Arial" fontSize="12"/>
+	<style name="Row" mode="Transparent">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+			<style backcolor="#0000CC"/>
+		</conditionalStyle>
+	</style>
+	<style name="Encabezado de columnas" forecolor="#666666" isBlankWhenNull="true" fontSize="10" isBold="true" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<style name="Tabla de control" vAlign="Middle" fontSize="8"/>
+	<style name="Tabla de control Datos" vAlign="Middle" fontSize="7" isItalic="true"/>
+	<style name="Title" fontName="Times New Roman" fontSize="30" isBold="true" pdfFontName="Times-Bold"/>
+	<style name="style1"/>
+	<style name="Column header estatico" forecolor="#000000" fontName="SansSerif" fontSize="10" isBold="true" isItalic="true"/>
+	<parameter name="obraNumero" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[declare @obraNumero int
+
+set @obraNumero=$P{obraNumero}
+
+
+select COUNT (distinct(Piezas.id_pieza)) as cantidad,
+paquetes.numero as numeroLista, Piezas.elemento, Piezas.correlatividad, Piezas.descripcion, Piezas.descripcion_extra,
+Piezas.pintura, Piezas.color, Piezas.codigo,
+SUM (Subpiezas.peso) as peso from Obras
+inner join Paquetes
+inner join Piezas
+inner join Subpiezas
+on Subpiezas.id_pieza=Piezas.id_pieza
+on Piezas.id_paquete=Paquetes.id_paquete
+on Paquetes.id_obra=Obras.id_obra
+/*inner join Paquete_Empleado_Aprobado on Paquetes.id_paquete=Paquete_Empleado_Aprobado.id_paquete*/
+where Obras.numero=@obraNumero
+and Piezas.activado=1
+and Paquetes.activado=1
+and Subpiezas.activado=1
+and Piezas.area<>'warehouse'
+and Piezas.id_pieza not in (select Piezas.id_pieza from Obras
+				inner join Paquetes
+				inner join Piezas
+				inner join Subpiezas
+				left join Subpiezas_Tareas
+				on Subpiezas_Tareas.id_subpieza=Subpiezas.id_subpieza
+				on Subpiezas.id_pieza=Piezas.id_pieza
+				on Piezas.id_paquete=Paquetes.id_paquete
+				on Paquetes.id_obra=Obras.id_obra
+				where Obras.numero=@obraNumero
+				and Subpiezas_Tareas.estado = 'finalizado'
+				and Piezas.activado=1
+				and Paquetes.activado=1
+				and Subpiezas.activado=1)
+	and Paquetes.id_paquete in
+					(select id_paquete from Paquete_Empleado_Aprobado
+					where Paquete_Empleado_Aprobado.activado=1)
+
+Group by paquetes.numero,
+Piezas.elemento, Piezas.correlatividad, Piezas.descripcion, Piezas.descripcion_extra,
+Piezas.pintura, Piezas.color, Piezas.codigo
+order by Piezas.codigo]]>
+	</queryString>
+	<field name="cantidad" class="java.lang.Integer"/>
+	<field name="numeroLista" class="java.lang.Integer"/>
+	<field name="elemento" class="java.lang.String"/>
+	<field name="correlatividad" class="java.lang.String"/>
+	<field name="descripcion" class="java.lang.String"/>
+	<field name="descripcion_extra" class="java.lang.String"/>
+	<field name="pintura" class="java.lang.Boolean"/>
+	<field name="color" class="java.lang.String"/>
+	<field name="codigo" class="java.lang.Integer"/>
+	<field name="peso" class="java.math.BigDecimal"/>
+	<pageHeader>
+		<band height="25"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="11">
+			<staticText>
+				<reportElement uuid="5c472ec9-f171-4492-8e94-2a6b0f8ed206" x="0" y="0" width="31" height="11"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cant.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="71a50a41-5e35-413a-90d8-7183cfd547ab" x="31" y="0" width="44" height="11"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Lista]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="36379581-016c-4013-a88f-38efd90b45ed" x="135" y="0" width="46" height="11"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Elemento]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="4885e248-27d4-4137-adae-a502a960ccce" x="181" y="0" width="65" height="11"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Correlatividad]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="e97f6cf6-1531-458d-a140-ba314669f7f8" x="246" y="0" width="191" height="11"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Descripcion]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="f93c49ae-e6a3-419d-a319-350ef6473840" x="437" y="0" width="185" height="11"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Descripcion extra]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ea79c884-01bb-4cae-a978-a91bfcd2b789" x="622" y="0" width="40" height="11"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Pintura]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="50508aa3-d218-4818-8712-2b674857ab9d" x="662" y="0" width="77" height="11"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Color]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="2fc6fb7c-2f49-4d35-a491-1ee46ff80c24" x="75" y="0" width="60" height="11"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Código]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ab80f599-94c1-4c56-a08c-f0c26d021bcc" x="739" y="0" width="63" height="11"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Peso]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="11" splitType="Stretch">
+			<textField>
+				<reportElement uuid="38459f51-8efe-4726-b2a2-edf9c2da43b8" x="0" y="0" width="31" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="fc42e10a-dc6d-4211-adb6-379d13cb5b6c" x="31" y="0" width="44" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numeroLista}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="03308ad5-bff7-43b1-a1cc-578fb0e9b509" x="135" y="0" width="46" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{elemento}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="6851368c-8a78-4276-af5c-48b8d7314fca" x="181" y="0" width="65" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{correlatividad}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="56442368-b018-4293-aa70-bb9c2d736f7d" x="246" y="0" width="191" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="79dcfa0c-f858-470d-ab14-3ec0c91a6ace" x="437" y="0" width="185" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descripcion_extra}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="cffe1a7a-9a60-4824-81b1-fa5cbe55f45a" x="622" y="0" width="40" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{pintura}.equals( true )?"Si":"No"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="f3ab1cb4-43f7-4307-ba4c-329473c09ed7" x="662" y="0" width="77" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{color}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="b845a535-4d37-4ce6-9237-6cdba697953c" x="75" y="0" width="60" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{codigo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="b910ea67-d2bb-40cf-873e-c7abddc35c26" x="739" y="0" width="63" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{peso}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" columnCount="7" printOrder="Horizontal" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="120" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="84c6ede1-60d2-4aa5-b3a4-033027bb2dca">
+	<property name="ireport.zoom" value="2.143588810000002"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="pCodigo" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[declare @codigo int
+
+set @codigo = $P{pCodigo}
+
+
+Select
+Piezas.codigo,
+AuxRemitidos.CantidadRemitida, AuxRemitidos.PiezasRemitoIdRemito,
+AuxRemitidos.RemitoFecha, AuxRemitidos.RemitoNumero
+from Piezas
+left join
+	(select count (Piezas.id_pieza) as CantidadRemitida, Piezas.codigo,
+	Piezas_Remitos.id_remito as PiezasRemitoIdRemito,
+	Remitos.numero as RemitoNumero, Remitos.fecha as RemitoFecha
+	from Obras
+	inner join Paquetes
+	inner join Piezas
+	inner join Piezas_Remitos
+	inner join Remitos
+	on Remitos.id_remito=Piezas_Remitos.id_remito
+	on Piezas.id_pieza=Piezas_Remitos.id_pieza
+	on Paquetes.id_paquete=Piezas.id_paquete
+	on Paquetes.id_obra=Obras.id_obra
+	where Piezas_Remitos.activado=1
+	group by
+	Piezas.codigo,
+	Piezas_Remitos.id_remito,
+	Remitos.numero, Remitos.fecha) as AuxRemitidos
+on Piezas.codigo=AuxRemitidos.codigo
+
+where Piezas.activado=1
+and Piezas.codigo=@codigo
+
+group by
+Piezas.codigo, Piezas.elemento, Piezas.correlatividad, Piezas.area,
+Piezas.descripcion, Piezas.descripcion_extra, Piezas.largo,
+AuxRemitidos.CantidadRemitida, AuxRemitidos.PiezasRemitoIdRemito,
+AuxRemitidos.RemitoFecha, AuxRemitidos.RemitoNumero]]>
+	</queryString>
+	<field name="codigo" class="java.lang.Integer"/>
+	<field name="CantidadRemitida" class="java.lang.Integer"/>
+	<field name="PiezasRemitoIdRemito" class="java.lang.Integer"/>
+	<field name="RemitoFecha" class="java.sql.Timestamp"/>
+	<field name="RemitoNumero" class="java.lang.Integer"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="11" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="67152553-1cb6-4848-a87f-76e80f20984e" x="0" y="0" width="46" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{RemitoNumero}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy" isBlankWhenNull="true">
+				<reportElement uuid="63e97290-3db6-4236-9fef-bfa5002a175c" x="46" y="0" width="46" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{RemitoFecha}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="915232e0-33fd-4eeb-bd3a-dfe8af2c72d2" x="92" y="0" width="25" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CantidadRemitida}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reportePlantaFinalizar3" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a76a396f-1328-4b78-9988-2bde4b94cc03">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="42"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Header Header" mode="Opaque" forecolor="#000000" backcolor="#0000CC" fill="Solid" fontName="DejaVu Sans" fontSize="10" isBold="true"/>
+	<style name="Titulo" mode="Transparent" forecolor="#000000" backcolor="#000000" fill="Solid" fontSize="22" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Fila" forecolor="#000000" backcolor="#F0F0F0" fontName="SansSerif" fontSize="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Datos" fontSize="8"/>
+	<parameter name="num_obra" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[$F{Obras_numero}]]></defaultValueExpression>
+	</parameter>
+	<parameter name="nom_sector" class="java.lang.String">
+		<defaultValueExpression><![CDATA[$F{nom_sector}]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select obras.numero as Obras_numero, obras.nombre as Obras_nombre, Paquetes.fecha_fabricacion, cast(Paquetes.numero as varchar(10)) as Paquete,
+(Piezas.elemento  + '-'+ cast(Piezas.correlatividad as varchar(20))) as Pieza,
+(Subpiezas.elemento + cast(Subpiezas.correlatividad as varchar(20))) as Subpieza,
+Tareas.descripcion,
+(Materiales.tipo + ' - ' + cast(Materiales.espesor as varchar(20))) as Materiales,
+Tareas.id_tarea,
+Subpiezas.codigo,
+count(Subpiezas.codigo) as cantidad, sectores.nombre as nom_sector, CONVERT(varchar(11), getdate(), 103) as fecha_actual
+from (Obras inner join
+(Paquetes inner join
+(Piezas inner join
+(Subpiezas inner join
+(Subpiezas_Tareas inner join
+(Tareas inner join Sectores
+on Tareas.id_sector = Sectores.id_sector and Sectores.nombre=$P{nom_sector})
+on Subpiezas_Tareas.id_tarea = Tareas.id_tarea)
+on Subpiezas_Tareas.id_subpieza = Subpiezas.id_subpieza and Subpiezas_Tareas.estado = 'pendiente')
+on Subpiezas.id_pieza = Piezas.id_pieza)
+on Piezas.id_paquete = Paquetes.id_paquete)
+on Paquetes.id_obra = Obras.id_obra and Obras.numero = $P{num_obra}) inner join Materiales on Materiales.id_material=Subpiezas.id_material
+where Subpiezas_Tareas.activado = 1
+group by obras.numero, obras.nombre, Paquetes.fecha_fabricacion, Paquetes.numero, Paquetes.numero_revision, Piezas.elemento, Piezas.correlatividad, Subpiezas.elemento, Subpiezas.correlatividad, Tareas.descripcion, Tareas.descripcion_extra, Materiales.tipo, Materiales.espesor, Tareas.id_tarea, Subpiezas.codigo, sectores.nombre
+order by Paquetes.fecha_fabricacion, Paquete, Pieza]]>
+	</queryString>
+	<field name="Obras_numero" class="java.lang.Integer"/>
+	<field name="Obras_nombre" class="java.lang.String"/>
+	<field name="fecha_fabricacion" class="java.lang.String"/>
+	<field name="Paquete" class="java.lang.String"/>
+	<field name="Pieza" class="java.lang.String"/>
+	<field name="Subpieza" class="java.lang.String"/>
+	<field name="descripcion" class="java.lang.String"/>
+	<field name="Materiales" class="java.lang.String"/>
+	<field name="id_tarea" class="java.lang.Integer"/>
+	<field name="codigo" class="java.lang.Integer"/>
+	<field name="cantidad" class="java.lang.Integer"/>
+	<field name="nom_sector" class="java.lang.String"/>
+	<field name="fecha_actual" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="87" splitType="Stretch">
+			<rectangle>
+				<reportElement uuid="8884ab33-4693-44b5-a976-94fe5b63a4fb" mode="Transparent" x="597" y="0" width="205" height="63"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="620a253a-9ebb-4845-973b-2e947affb125" x="360" y="0" width="237" height="63"/>
+			</rectangle>
+			<staticText>
+				<reportElement uuid="7d9274d4-fed7-4e77-b95e-20d80a78b801" style="Titulo" x="63" y="0" width="297" height="29"/>
+				<textElement>
+					<font size="22" isBold="false" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Reporte de Tareas]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="31f9c93e-c3d6-4448-968a-91a039aa81d8" style="Datos" x="365" y="0" width="232" height="20"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Obra: "+$F{Obras_numero} + " - "+ $F{Obras_nombre}]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement uuid="19db9239-e5ef-4f10-aa16-af650d98022d" style="Titulo" mode="Transparent" x="0" y="0" width="359" height="63"/>
+			</rectangle>
+			<textField>
+				<reportElement uuid="0e812b75-bc79-4a0e-aca2-b80c76186190" x="597" y="0" width="186" height="20"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Sector:"+$F{nom_sector}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="1c538ee0-2c14-4429-a597-a69aab3f07a4" x="1" y="67" width="78" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha fab.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="664d2fb5-ae95-4d83-8b5b-68195e17bf6d" x="79" y="67" width="70" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Paquete]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="b3fbe7fa-ad2d-49d2-9d03-38cfcfa9abc5" x="149" y="67" width="61" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Pieza]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="8ec8f155-7d7b-41e5-8bf9-8069708bf6b0" x="210" y="67" width="68" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Subpieza]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="8a2a5c4d-b86c-409b-98da-d1c393d1eeeb" x="278" y="67" width="252" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tarea]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="667d1da4-aa32-45e4-94e2-64c1ceff193f" x="530" y="67" width="135" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Material]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="e31ebc22-296d-4def-9700-586e0790bd52" x="665" y="67" width="65" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[A finalizar]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="1a609527-14b6-446d-b4db-d9aa0dbf883f" x="730" y="67" width="72" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Finalizadas]]></text>
+			</staticText>
+			<line>
+				<reportElement uuid="91394bcc-6c31-4b37-b71f-a5ed3a06ff98" x="1" y="86" width="802" height="1"/>
+			</line>
+			<textField>
+				<reportElement uuid="fe7e4a5a-60f0-4833-84fb-9eb98287e389" x="63" y="29" width="297" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["Fecha de emisión:"+$F{fecha_actual}]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement uuid="eabba44f-7254-4e2f-aa90-ab3eb8848e9a" style="Titulo" x="2" y="0" width="61" height="63"/>
+				<imageExpression><![CDATA["Reportes/logo01.jpg"]]></imageExpression>
+			</image>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="22" splitType="Stretch">
+			<textField>
+				<reportElement uuid="e1794099-acdd-4853-8b92-d97d94a59a5d" x="1" y="0" width="78" height="20"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fecha_fabricacion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="2203b8dd-e2ee-41de-8a1e-1ff97d83cbbc" x="79" y="0" width="70" height="20"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Paquete}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="ff973625-af3b-4d87-a5be-cf6431c5337b" x="149" y="0" width="61" height="20"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Pieza}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="629964e7-df17-4693-8aed-0f9ecf0690e8" x="210" y="0" width="68" height="20"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Subpieza}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="7ae3c53d-2849-4ab7-ad99-de504877797d" x="278" y="0" width="252" height="20"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="9734e1de-b6fe-431b-ad8c-8c2ce79fce47" x="530" y="0" width="135" height="20"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Materiales}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement uuid="951007e2-258f-4102-b7a9-78f83f09d343" x="1" y="19" width="802" height="1"/>
+			</line>
+			<rectangle>
+				<reportElement uuid="8a480be2-7748-43b3-bc79-85d8962cd710" mode="Transparent" x="730" y="0" width="73" height="19"/>
+			</rectangle>
+			<textField>
+				<reportElement uuid="fe15ece9-2ab2-45c1-ab36-d6db2e87af96" x="665" y="0" width="65" height="20"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="15"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="20" splitType="Stretch">
+			<rectangle>
+				<reportElement uuid="c9b411ba-ac41-41c8-aa78-7faae573317b" x="0" y="0" width="801" height="20"/>
+			</rectangle>
+			<textField evaluationTime="Report">
+				<reportElement uuid="3d1b4098-bdcc-4488-a484-ac4168a78c10" x="761" y="0" width="40" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="d4a672a6-35a0-42b3-ab0d-25455ddbe89a" x="681" y="0" width="80" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Pag. "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

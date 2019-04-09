@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteFaltantesDeObra" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="ed755a2b-c45a-4087-8f03-485ae77d65d8">
+	<property name="ireport.zoom" value="5.559917313492399"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="811"/>
+	<style name="SubTitle" forecolor="#736343" fontName="Arial" fontSize="18"/>
+	<style name="Column header" forecolor="#666666" fontSize="10" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Detail" fontName="Arial" fontSize="12"/>
+	<style name="Row" mode="Transparent">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+			<style backcolor="#0000CC"/>
+		</conditionalStyle>
+	</style>
+	<style name="Encabezado de columnas" forecolor="#666666" isBlankWhenNull="true" fontSize="10" isBold="true" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<style name="Tabla de control" vAlign="Middle" fontSize="8"/>
+	<style name="Tabla de control Datos" vAlign="Middle" fontSize="7" isItalic="true"/>
+	<style name="Title" fontName="Times New Roman" fontSize="30" isBold="true" pdfFontName="Times-Bold"/>
+	<style name="style1">
+		<pen lineStyle="Double"/>
+	</style>
+	<style name="Column header estatico" forecolor="#000000" fontName="SansSerif" fontSize="10" isBold="true" isItalic="true"/>
+	<style name="Separadoras Rojas">
+		<pen lineStyle="Double" lineColor="#990000"/>
+	</style>
+	<style name="Footer Grupo Piezas" fontSize="8" isBold="true" isItalic="false" isUnderline="false"/>
+	<parameter name="paqueteNum" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="obraNum" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="piezaElemento" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[declare @obraNum int
+declare @paqueteNum int
+declare @elemento varchar(50)
+set @paqueteNum = 9
+set @obraNum = 426
+set @elemento = ''
+
+
+Select 	Obras.numero as ObraNumero, Obras.nombre as ObraNombre,
+Paquetes.numero as PaqueteNumero, Paquetes.descripcion as PaqueteDescripcion,
+
+Piezas.codigo, COUNT (distinct Piezas.id_pieza) as total,
+Piezas.elemento as PiezaElementos,Piezas.correlatividad as PiezasCorrelatividad, Piezas.area as PiezasArea,
+Piezas.descripcion as PiezaDescripcion, Piezas.descripcion_extra as PiezasDescripcionExtra,
+Piezas.largo as PiezasLargo,
+
+
+Materiales.tipo as SubpiezaElemento, Materiales.espesor as SubpiezaCorrelatividad, Materiales.calidad as SubpiezaDescripcion,
+Materiales.codigo as SubpiezaCodigo,
+
+AuxProducidos.Producidos, AuxNoProducidos.NoProducidos,
+AuxRemitidos.CantidadRemitida, AuxRemitidos.PiezasRemitoIdRemito,
+AuxRemitidos.RemitoFecha, AuxRemitidos.RemitoNumero,
+AuxTotalRemitido.TotalRemitido, AuxTotalNoRemitido.TotalNoRemitido
+
+
+
+from obras
+inner join Paquetes
+inner join Piezas
+inner join Subpiezas
+inner join Materiales
+on Subpiezas.id_material=Materiales.id_material
+on Subpiezas.id_pieza=Piezas.id_pieza
+on Piezas.id_paquete=Paquetes.id_paquete
+on paquetes.id_obra=Obras.id_obra
+left join
+	(select Piezas.codigo as Codigo, count(Piezas.id_pieza) AS Producidos
+	from Piezas
+	where Piezas.finalizado=1 and activado=1 group by Piezas.codigo ) as AuxProducidos
+on Piezas.codigo = AuxProducidos.Codigo
+left join
+	(select count (Piezas.id_pieza) as CantidadRemitida, Piezas.codigo,
+	Piezas_Remitos.id_remito as PiezasRemitoIdRemito,
+	Remitos.numero as RemitoNumero, Remitos.fecha as RemitoFecha
+	from Obras
+	inner join Paquetes
+	inner join Piezas
+	inner join Piezas_Remitos
+	inner join Remitos
+	on Remitos.id_remito=Piezas_Remitos.id_remito
+	on Piezas.id_pieza=Piezas_Remitos.id_pieza
+	on Paquetes.id_paquete=Piezas.id_paquete
+	on Paquetes.id_obra=Obras.id_obra
+	where Piezas_Remitos.activado=1
+	group by
+	Piezas.codigo,
+	Piezas_Remitos.id_remito,
+	Remitos.numero, Remitos.fecha) as AuxRemitidos
+on Piezas.codigo=AuxRemitidos.codigo
+left join
+	(select Piezas.codigo as Codigo, count(Piezas.id_pieza) AS NoProducidos
+	from Piezas
+	where Piezas.finalizado=0 and activado=1 group by Piezas.codigo ) as AuxNoProducidos
+on Piezas.codigo = AuxNoProducidos.Codigo
+left join
+	(select Piezas.codigo as Codigo, count(Piezas.id_pieza) AS TotalRemitido
+	from Piezas inner join Piezas_Remitos
+	on Piezas.id_pieza=Piezas_Remitos.id_pieza
+	where piezas.activado=1
+	and Piezas_Remitos.activado=1
+	group by Piezas.codigo) as AuxTotalRemitido
+on Piezas.codigo=AuxTotalRemitido.Codigo
+
+left join
+	(select Piezas.codigo as Codigo, count(Piezas.id_pieza) AS TotalNoRemitido
+	from Piezas
+	where piezas.activado=1
+	and Piezas.id_pieza not in (select Piezas_Remitos.id_pieza
+								from Piezas_Remitos
+								where Piezas_Remitos.activado=1)
+	group by Piezas.codigo) as AuxTotalNoRemitido
+on Piezas.codigo=AuxTotalNoRemitido.Codigo
+
+
+where paquetes.activado=1
+and Obras.numero=@obraNum
+and (paquetes.numero=@paqueteNum or @paqueteNum = 0 )
+and (Piezas.elemento=@elemento or @elemento ='')
+
+group by
+Obras.numero, Obras.nombre,
+Paquetes.numero, Paquetes.descripcion,
+Piezas.codigo, Piezas.elemento, Piezas.correlatividad, Piezas.area,
+Piezas.descripcion, Piezas.descripcion_extra, Piezas.largo,
+AuxProducidos.Producidos, AuxNoProducidos.NoProducidos,
+AuxRemitidos.CantidadRemitida, AuxRemitidos.PiezasRemitoIdRemito,
+AuxRemitidos.RemitoFecha, AuxRemitidos.RemitoNumero,
+AuxTotalRemitido.TotalRemitido, AuxTotalNoRemitido.TotalNoRemitido,
+
+
+/*0
+Subpiezas.elemento, Subpiezas.correlatividad, Subpiezas.descripcion,
+Subpiezas.codigo
+*/
+
+Materiales.tipo, Materiales.espesor, Materiales.calidad,
+Materiales.codigo
+
+order by PaqueteNumero, PiezaElementos, PiezasCorrelatividad,
+SubpiezaElemento, SubpiezaCorrelatividad, SubpiezaCodigo, RemitoFecha]]>
+	</queryString>
+	<field name="ObraNumero" class="java.lang.Integer"/>
+	<field name="ObraNombre" class="java.lang.String"/>
+	<field name="PaqueteNumero" class="java.lang.Integer"/>
+	<field name="PaqueteDescripcion" class="java.lang.String"/>
+	<field name="codigo" class="java.lang.Integer"/>
+	<field name="total" class="java.lang.Integer"/>
+	<field name="PiezaElementos" class="java.lang.String"/>
+	<field name="PiezasCorrelatividad" class="java.lang.String"/>
+	<field name="PiezasArea" class="java.lang.String"/>
+	<field name="PiezaDescripcion" class="java.lang.String"/>
+	<field name="PiezasDescripcionExtra" class="java.lang.String"/>
+	<field name="PiezasLargo" class="java.lang.Integer"/>
+	<field name="SubpiezaElemento" class="java.lang.String"/>
+	<field name="SubpiezaCorrelatividad" class="java.math.BigDecimal"/>
+	<field name="SubpiezaDescripcion" class="java.lang.String"/>
+	<field name="SubpiezaCodigo" class="java.lang.String"/>
+	<field name="Producidos" class="java.lang.Integer"/>
+	<field name="NoProducidos" class="java.lang.Integer"/>
+	<field name="CantidadRemitida" class="java.lang.Integer"/>
+	<field name="PiezasRemitoIdRemito" class="java.lang.Integer"/>
+	<field name="RemitoFecha" class="java.sql.Timestamp"/>
+	<field name="RemitoNumero" class="java.lang.Integer"/>
+	<field name="TotalRemitido" class="java.lang.Integer"/>
+	<field name="TotalNoRemitido" class="java.lang.Integer"/>
+	<group name="Paquete">
+		<groupExpression><![CDATA[$F{PaqueteNumero}]]></groupExpression>
+		<groupHeader>
+			<band height="27">
+				<textField>
+					<reportElement uuid="e25b1f2c-46a0-48b1-b286-8fe0c14fddcf" x="0" y="6" width="203" height="20" forecolor="#990000"/>
+					<textElement>
+						<font size="14" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA['Numero de lista: ' + $F{PaqueteNumero}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement uuid="e098a970-72a5-4f48-90f4-ad6be3876c6e" x="263" y="6" width="292" height="20" forecolor="#990000"/>
+					<textElement>
+						<font size="14" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA['Descripción: ' +  $F{PaqueteDescripcion}]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement uuid="2483cdfd-65c1-4370-8127-4145c7dba637" x="0" y="26" width="555" height="1" forecolor="#990000"/>
+				</line>
+				<line>
+					<reportElement uuid="2483cdfd-65c1-4370-8127-4145c7dba637" style="Separadoras Rojas" x="0" y="5" width="555" height="1" forecolor="#990000"/>
+					<graphicElement>
+						<pen lineWidth="3.0"/>
+					</graphicElement>
+				</line>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="PiezasArea">
+		<groupExpression><![CDATA[$F{PiezasArea}]]></groupExpression>
+		<groupHeader>
+			<band height="17">
+				<textField>
+					<reportElement uuid="59b75461-79fa-4a82-a851-400df700c2db" x="13" y="0" width="157" height="17"/>
+					<textElement>
+						<font size="12" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{PiezasArea}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="PiezaCodigo">
+		<groupExpression><![CDATA[$F{codigo}]]></groupExpression>
+		<groupHeader>
+			<band height="49">
+				<textField>
+					<reportElement uuid="5f4dc9fa-e450-4742-9e9f-18b76a59b3e6" x="33" y="4" width="296" height="11"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{PiezaElementos} + '-' + $F{PiezasCorrelatividad} + ' - ' + $F{PiezaDescripcion}
+ + ' - ' + $F{PiezasDescripcionExtra} + ' - ' + $F{PiezasLargo}]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement uuid="e569420d-3f39-4bf3-ac44-36ffe689358b" x="20" y="4" width="1" height="12"/>
+				</line>
+				<line>
+					<reportElement uuid="2483cdfd-65c1-4370-8127-4145c7dba637" style="Separadoras Rojas" x="13" y="3" width="541" height="1" forecolor="#990000"/>
+					<graphicElement>
+						<pen lineWidth="3.0" lineColor="#000000"/>
+					</graphicElement>
+				</line>
+				<textField>
+					<reportElement uuid="9eb14a41-6ac9-4b9a-b305-a046e60ab887" style="Footer Grupo Piezas" x="421" y="17" width="22" height="12"/>
+					<textElement>
+						<font size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{Producidos}.equals( null )? "0" : $F{Producidos}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement uuid="61cac641-83bc-40aa-8af6-f4c8ea8e18ea" style="Footer Grupo Piezas" x="357" y="17" width="68" height="12"/>
+					<textElement>
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Producidas]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="4180e299-17b6-489e-a187-1f75ec6bc777" style="Footer Grupo Piezas" x="370" y="5" width="74" height="11"/>
+					<textElement/>
+					<text><![CDATA[Total de piezas]]></text>
+				</staticText>
+				<textField>
+					<reportElement uuid="eda26a1a-5956-4a2b-b9ca-a305cbe443e1" style="Footer Grupo Piezas" x="444" y="5" width="83" height="11"/>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{total}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement uuid="61cac641-83bc-40aa-8af6-f4c8ea8e18ea" style="Footer Grupo Piezas" x="357" y="29" width="64" height="12"/>
+					<textElement>
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[No Producidas]]></text>
+				</staticText>
+				<textField>
+					<reportElement uuid="fcc60593-2fd2-4886-a799-68096c041217" style="Footer Grupo Piezas" x="421" y="28" width="22" height="12"/>
+					<textElement>
+						<font isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{NoProducidos}.equals( null )? "0" : $F{NoProducidos}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement uuid="fcc60593-2fd2-4886-a799-68096c041217" style="Footer Grupo Piezas" x="499" y="17" width="27" height="12"/>
+					<textElement>
+						<font isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{TotalRemitido}.equals( null )? "0" : $F{TotalRemitido}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement uuid="61cac641-83bc-40aa-8af6-f4c8ea8e18ea" style="Footer Grupo Piezas" x="446" y="17" width="53" height="12"/>
+					<textElement>
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[Remitidas]]></text>
+				</staticText>
+				<line>
+					<reportElement uuid="603b0ed7-914e-4569-bbc0-544616de5096" x="357" y="5" width="1" height="36"/>
+				</line>
+				<line>
+					<reportElement uuid="603b0ed7-914e-4569-bbc0-544616de5096" x="443" y="5" width="1" height="35"/>
+				</line>
+				<line>
+					<reportElement uuid="603b0ed7-914e-4569-bbc0-544616de5096" x="526" y="5" width="1" height="36"/>
+				</line>
+				<line>
+					<reportElement uuid="31806b85-0508-4171-a5cd-9e3bfd24c743" x="370" y="16" width="156" height="1"/>
+				</line>
+				<line>
+					<reportElement uuid="31806b85-0508-4171-a5cd-9e3bfd24c743" x="358" y="29" width="168" height="1"/>
+				</line>
+				<line>
+					<reportElement uuid="31806b85-0508-4171-a5cd-9e3bfd24c743" x="358" y="40" width="168" height="1"/>
+				</line>
+				<line>
+					<reportElement uuid="005d2214-d94e-4aed-8981-772194df5787" x="21" y="16" width="350" height="1"/>
+				</line>
+				<textField>
+					<reportElement uuid="fcc60593-2fd2-4886-a799-68096c041217" style="Footer Grupo Piezas" x="498" y="29" width="28" height="12"/>
+					<textElement>
+						<font isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{TotalNoRemitido}.equals( null )? "0" : $F{TotalNoRemitido}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement uuid="61cac641-83bc-40aa-8af6-f4c8ea8e18ea" style="Footer Grupo Piezas" x="446" y="29" width="53" height="12"/>
+					<textElement>
+						<font size="8" isBold="true" isItalic="false"/>
+					</textElement>
+					<text><![CDATA[No Remitidas]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="SumpiezaPosicion">
+		<groupExpression><![CDATA[$F{SubpiezaCodigo}]]></groupExpression>
+		<groupHeader>
+			<band height="12">
+				<textField>
+					<reportElement uuid="d6bed7df-5298-4b83-b11a-b65c513b7aa0" x="58" y="0" width="271" height="11"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{SubpiezaElemento} + " " + $F{SubpiezaCorrelatividad} + " - " + $F{SubpiezaDescripcion}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement uuid="313cb7e1-5f30-4fa9-a916-c5568fca7a23" x="330" y="1" width="39" height="11"/>
+					<textElement>
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Cant.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="313cb7e1-5f30-4fa9-a916-c5568fca7a23" x="371" y="1" width="57" height="11"/>
+					<textElement>
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Nº Remito]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="4aa4b283-b8f5-404c-90dc-a60ef342b2e6" x="430" y="1" width="85" height="11"/>
+					<textElement>
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Fecha]]></text>
+				</staticText>
+				<line>
+					<reportElement uuid="2484e617-d4a9-463c-8919-a355865ef4b6" x="53" y="0" width="476" height="1"/>
+				</line>
+				<line>
+					<reportElement uuid="162b3cb7-8134-4eeb-82e2-e06f99f1aca8" x="53" y="11" width="475" height="1"/>
+				</line>
+				<line>
+					<reportElement uuid="e569420d-3f39-4bf3-ac44-36ffe689358b" x="528" y="1" width="1" height="11"/>
+				</line>
+				<line>
+					<reportElement uuid="e569420d-3f39-4bf3-ac44-36ffe689358b" x="428" y="1" width="1" height="11"/>
+				</line>
+				<line>
+					<reportElement uuid="e569420d-3f39-4bf3-ac44-36ffe689358b" x="369" y="1" width="1" height="11"/>
+				</line>
+				<line>
+					<reportElement uuid="e569420d-3f39-4bf3-ac44-36ffe689358b" x="329" y="1" width="1" height="11"/>
+				</line>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="73" splitType="Stretch">
+			<rectangle>
+				<reportElement uuid="66b53c79-60a8-4eb0-a3e8-a994b41ec898" mode="Transparent" x="0" y="0" width="555" height="73"/>
+			</rectangle>
+			<staticText>
+				<reportElement uuid="747ef664-f296-4d16-9a66-4c7b5de894c2" x="74" y="0" width="481" height="73" forecolor="#000000" backcolor="#000000"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="22" isItalic="true" pdfFontName="Times-Roman"/>
+				</textElement>
+				<text><![CDATA[Listado de elementos despachados para protocolo de calidad]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="52" splitType="Stretch">
+			<textField>
+				<reportElement uuid="5d9beb0d-81eb-4d5b-b7b2-2a12d2764e67" style="Column header" x="162" y="3" width="206" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{ObraNumero}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="1de5f4a6-9d86-4c62-8ef1-ee7dd65ea128" style="Column header estatico" x="73" y="3" width="89" height="20" forecolor="#333333" backcolor="#FFFFFF"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Número de obra:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="450f1ca7-c0d9-44be-9590-ad323a76909c" style="Column header estatico" x="73" y="23" width="89" height="20" forecolor="#333333" backcolor="#FFFFFF"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Obra:]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="6219b413-aa4a-448d-847a-90724be7e749" style="Column header" x="162" y="23" width="206" height="20"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ObraNombre}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<textField>
+				<reportElement uuid="e0ec0b7a-4f6a-4be8-8671-606d663acd85" x="339" y="0" width="29" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CantidadRemitida}.equals( null )? "" : $F{CantidadRemitida}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="5deaf919-897a-4ec4-a803-d6f89fbaafe7" x="370" y="0" width="57" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{RemitoNumero}.equals( null )? "" : $F{RemitoNumero}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="3b7020d7-6289-49a5-bcc9-3bd6d96d491e" style="Separadoras Rojas" x="429" y="0" width="99" height="11"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{RemitoFecha}.equals( null )? "No hay remitidos" : $F{RemitoFecha}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement uuid="162b3cb7-8134-4eeb-82e2-e06f99f1aca8" x="330" y="11" width="198" height="1"/>
+			</line>
+			<line>
+				<reportElement uuid="e569420d-3f39-4bf3-ac44-36ffe689358b" x="329" y="0" width="1" height="12"/>
+			</line>
+			<line>
+				<reportElement uuid="e569420d-3f39-4bf3-ac44-36ffe689358b" x="369" y="0" width="1" height="12"/>
+			</line>
+			<line>
+				<reportElement uuid="710c0b15-0614-448e-afc3-bd55de248926" x="428" y="0" width="1" height="12"/>
+			</line>
+			<line>
+				<reportElement uuid="d8f8d910-ed27-404f-b166-4e096edf09da" x="528" y="0" width="1" height="12"/>
+			</line>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="24" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

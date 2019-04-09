@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ReporteTablaControl" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="34305751-c788-4bcd-98a7-6398ff42e5cc">
+	<property name="ireport.zoom" value="1.9487171000000025"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="SubTitle" forecolor="#736343" fontName="Arial" fontSize="18"/>
+	<style name="Column header" forecolor="#666666" fontSize="10" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Detail" fontName="Arial" fontSize="12"/>
+	<style name="Row" mode="Transparent">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+			<style backcolor="#0000CC"/>
+		</conditionalStyle>
+	</style>
+	<style name="Encabezado de columnas" forecolor="#666666" isBlankWhenNull="true" fontSize="10" isBold="true" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<style name="Tabla de control" vAlign="Middle" fontSize="8"/>
+	<style name="Tabla de control Datos" vAlign="Middle" fontSize="7" isItalic="true"/>
+	<style name="Title" fontName="Times New Roman" fontSize="30" isBold="true" pdfFontName="Times-Bold"/>
+	<style name="style1"/>
+	<style name="Column header estatico" forecolor="#000000" fontName="SansSerif" fontSize="10" isBold="true" isItalic="true"/>
+	<queryString>
+		<![CDATA[declare @idObra int
+set @idObra=(select Obras.id_obra from Obras where Obras.numero=415)
+
+select top 1 (Empleados.apellido+', ' + Empleados.nombre) as creador, Paquete_Empleado_Creado.fecha as fechaCreador
+FROM Paquete_Empleado_Creado
+inner join Paquetes on Paquete_Empleado_Creado.id_paquete=Paquetes.id_paquete
+inner join Empleados on Paquete_Empleado_Creado.id_empleado=Empleados.id_empleado
+WHERE Paquetes.numero=1 and Paquetes.id_obra=@idObra
+order by fecha desc
+
+select top 1 (Empleados.apellido+', ' + Empleados.nombre) as reviso, Paquete_Empleado_Revizado.fecha as fechaReviso
+FROM Paquete_Empleado_Revizado
+inner join Paquetes on Paquete_Empleado_Revizado.id_paquete=Paquetes.id_paquete
+inner join Empleados on Paquete_Empleado_Revizado.id_empleado=Empleados.id_empleado
+WHERE Paquetes.numero=1  and Paquetes.id_obra=@idObra
+order by fecha desc
+
+select top 1 (Empleados.apellido+', ' + Empleados.nombre) as aprovbo, Paquete_Empleado_Aprobado.fecha as fechaAprobo
+FROM Paquete_Empleado_Aprobado
+inner join Paquetes on Paquete_Empleado_Aprobado.id_paquete=Paquetes.id_paquete
+inner join Empleados on Paquete_Empleado_Aprobado.id_empleado=Empleados.id_empleado
+WHERE Paquetes.numero=1 and Paquetes.id_obra=@idObra
+order by fecha desc
+
+select top 1 (Empleados.apellido+', ' + Empleados.nombre) as aproboCtrl, Paquete_Empleado_Aprobado_Produccion.fecha as fechaAproboCtrl
+FROM Paquete_Empleado_Aprobado_Produccion
+inner join Paquetes on Paquete_Empleado_Aprobado_Produccion.id_paquete=Paquetes.id_paquete
+inner join Empleados on Paquete_Empleado_Aprobado_Produccion.id_empleado=Empleados.id_empleado
+WHERE Paquetes.numero=1 and Paquetes.id_obra=@idObra
+order by fecha desc
+
+select top 1 (Empleados.apellido+', ' + Empleados.nombre) as envio, Paquete_Empleado_Enviado.fecha as fechaEnvio
+FROM Paquete_Empleado_Enviado
+inner join Paquetes on Paquete_Empleado_Enviado.id_paquete=Paquetes.id_paquete
+inner join Empleados on Paquete_Empleado_Enviado.id_empleado=Empleados.id_empleado
+WHERE Paquetes.numero=1 and Paquetes.id_obra=@idObra
+order by fecha desc]]>
+	</queryString>
+	<field name="creador" class="java.lang.String"/>
+	<field name="fechaCreador" class="java.sql.Timestamp"/>
+	<detail>
+		<band height="125" splitType="Stretch">
+			<line>
+				<reportElement uuid="205007b6-8472-48c3-9e62-3fdd98ed8953" x="199" y="1" width="1" height="65"/>
+			</line>
+			<line>
+				<reportElement uuid="205007b6-8472-48c3-9e62-3fdd98ed8953" x="0" y="0" width="1" height="64"/>
+			</line>
+			<staticText>
+				<reportElement uuid="93fe58c0-7416-4d99-91b6-5d71aad55e1c" style="Tabla de control" x="309" y="1" width="45" height="15"/>
+				<textElement/>
+				<text><![CDATA[Firma]]></text>
+			</staticText>
+			<line>
+				<reportElement uuid="205007b6-8472-48c3-9e62-3fdd98ed8953" x="368" y="0" width="1" height="65"/>
+			</line>
+			<line>
+				<reportElement uuid="338a8246-4a19-4125-8576-301801287a53" x="0" y="16" width="368" height="1"/>
+			</line>
+			<staticText>
+				<reportElement uuid="93fe58c0-7416-4d99-91b6-5d71aad55e1c" style="Tabla de control" x="5" y="16" width="45" height="15"/>
+				<textElement/>
+				<text><![CDATA[Ejecutó]]></text>
+			</staticText>
+			<line>
+				<reportElement uuid="205007b6-8472-48c3-9e62-3fdd98ed8953" x="278" y="1" width="1" height="63"/>
+			</line>
+			<line>
+				<reportElement uuid="d9762f89-9dbe-47e4-b907-349350c239d0" x="0" y="0" width="368" height="1"/>
+			</line>
+			<line>
+				<reportElement uuid="338a8246-4a19-4125-8576-301801287a53" x="0" y="32" width="368" height="1"/>
+			</line>
+			<staticText>
+				<reportElement uuid="93fe58c0-7416-4d99-91b6-5d71aad55e1c" style="Tabla de control" x="220" y="2" width="45" height="15"/>
+				<textElement/>
+				<text><![CDATA[Fecha]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="93fe58c0-7416-4d99-91b6-5d71aad55e1c" style="Tabla de control" x="5" y="48" width="45" height="17"/>
+				<textElement/>
+				<text><![CDATA[Aprobó]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="93fe58c0-7416-4d99-91b6-5d71aad55e1c" style="Tabla de control" x="5" y="1" width="45" height="15"/>
+				<textElement/>
+				<text><![CDATA[TECNICA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="93fe58c0-7416-4d99-91b6-5d71aad55e1c" style="Tabla de control" x="5" y="33" width="45" height="15"/>
+				<textElement/>
+				<text><![CDATA[Revisó]]></text>
+			</staticText>
+			<line>
+				<reportElement uuid="338a8246-4a19-4125-8576-301801287a53" x="0" y="48" width="368" height="1"/>
+			</line>
+			<staticText>
+				<reportElement uuid="93fe58c0-7416-4d99-91b6-5d71aad55e1c" style="Tabla de control" x="96" y="2" width="45" height="15"/>
+				<textElement/>
+				<text><![CDATA[Nombre]]></text>
+			</staticText>
+			<line>
+				<reportElement uuid="205007b6-8472-48c3-9e62-3fdd98ed8953" x="50" y="1" width="1" height="65"/>
+			</line>
+			<line>
+				<reportElement uuid="338a8246-4a19-4125-8576-301801287a53" x="0" y="64" width="368" height="1"/>
+			</line>
+			<textField>
+				<reportElement uuid="9fe1b6df-8b99-46ab-bbc3-3c8e2b005a0a" x="51" y="17" width="148" height="16"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{creador}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="8436f275-7451-445c-9dfd-d6325a9235d1" x="200" y="17" width="78" height="15"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{fechaCreador}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

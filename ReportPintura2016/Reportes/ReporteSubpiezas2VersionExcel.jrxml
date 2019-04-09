@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ReporteSubpiezasVersion2Excel" language="groovy" pageWidth="802" pageHeight="555" orientation="Landscape" columnWidth="802" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="a8b6d877-1445-458e-8be1-30e4990e0e8f">
+	<property name="ireport.zoom" value="1.1000000000000023"/>
+	<property name="ireport.x" value="144"/>
+	<property name="ireport.y" value="0"/>
+	<style name="SubTitle" forecolor="#736343" fontName="Arial" fontSize="18"/>
+	<style name="Column header" forecolor="#666666" fontSize="10" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Detail" fontName="Arial" fontSize="12"/>
+	<style name="Row" mode="Transparent">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+			<style backcolor="#0000CC"/>
+		</conditionalStyle>
+	</style>
+	<style name="Encabezado de columnas" forecolor="#666666" isBlankWhenNull="true" fontSize="10" isBold="true" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<style name="Tabla de control" vAlign="Middle" fontSize="8"/>
+	<style name="Tabla de control Datos" vAlign="Middle" fontSize="7" isItalic="true"/>
+	<style name="Title" fontName="Times New Roman" fontSize="30" isBold="true" pdfFontName="Times-Bold"/>
+	<style name="style1"/>
+	<style name="Column header estatico" forecolor="#000000" fontName="SansSerif" fontSize="10" isBold="true" isItalic="true"/>
+	<parameter name="piezas_codigo" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+   count (Subpiezas.elemento + cast(Subpiezas.correlatividad as varchar)) as Cantidad,
+     Subpiezas."elemento" AS Subpiezas_elemento,
+     Subpiezas."correlatividad" AS Subpiezas_correlatividad,
+     Subpiezas."descripcion" AS Subpiezas_descripcion,
+     Subpiezas."ancho" AS Subpiezas_ancho,
+     Subpiezas."largo" AS Subpiezas_largo,
+     Subpiezas."peso" AS Subpiezas_peso,
+     Subpiezas."observaciones" AS Subpiezas_observaciones,
+
+     Materiales."codigo" AS Materiales_codigo,
+     Materiales."tipo" AS Materiales_tipo,
+     Materiales."peso_especifico" AS Materiales_peso_especifico,
+     Materiales."espesor" AS Materiales_espesor,
+     Materiales."calidad" AS Materiales_calidad
+
+
+
+
+
+FROM
+     "dbo"."Materiales" Materiales INNER JOIN "dbo"."Subpiezas" Subpiezas ON Materiales."id_material" = Subpiezas."id_material"
+     INNER JOIN "dbo"."Piezas" Piezas ON Subpiezas."id_pieza" = Piezas."id_pieza"
+WHERE
+     Piezas.codigo = $P{piezas_codigo}
+     and Piezas.activado = 1
+     and Subpiezas.activado = 1
+
+Group by Subpiezas.codigo,
+     Subpiezas."elemento" ,
+     Subpiezas."correlatividad" ,
+     Subpiezas."descripcion" ,
+     Subpiezas."ancho" ,
+     Subpiezas."largo" ,
+     Subpiezas."peso" ,
+     Subpiezas."observaciones" ,
+     Materiales."codigo" ,
+     Materiales."tipo" ,
+     Materiales."peso_especifico" ,
+     Materiales."espesor" ,
+     Materiales."calidad" ,
+     Piezas."codigo"]]>
+	</queryString>
+	<field name="Cantidad" class="java.lang.Integer"/>
+	<field name="Subpiezas_elemento" class="java.lang.String"/>
+	<field name="Subpiezas_correlatividad" class="java.lang.String"/>
+	<field name="Subpiezas_descripcion" class="java.lang.String"/>
+	<field name="Subpiezas_ancho" class="java.lang.Integer"/>
+	<field name="Subpiezas_largo" class="java.math.BigDecimal"/>
+	<field name="Subpiezas_peso" class="java.math.BigDecimal"/>
+	<field name="Subpiezas_observaciones" class="java.lang.String"/>
+	<field name="Materiales_codigo" class="java.lang.String"/>
+	<field name="Materiales_tipo" class="java.lang.String"/>
+	<field name="Materiales_peso_especifico" class="java.math.BigDecimal"/>
+	<field name="Materiales_espesor" class="java.math.BigDecimal"/>
+	<field name="Materiales_calidad" class="java.lang.String"/>
+	<variable name="sumaPeso" class="java.lang.Float" calculation="Sum">
+		<variableExpression><![CDATA[$F{Cantidad}*$F{Subpiezas_peso}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="14" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="2e7a0868-a4ed-4afb-99d4-3261e26517b8" style="Encabezado de columnas" mode="Transparent" x="86" y="0" width="50" height="14"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Pos.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="37ea1d2e-e0e3-4d80-8a44-f829eaa142ce" style="Encabezado de columnas" mode="Transparent" x="627" y="0" width="65" height="14"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Peso unit]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="233ab962-6f82-4ac2-a00b-ca9b66881ff2" style="Encabezado de columnas" mode="Transparent" x="240" y="0" width="104" height="14"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Descripción]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="26189cc6-834a-4e25-a0c8-3c1a2f8d2eb8" style="Encabezado de columnas" mode="Transparent" x="460" y="0" width="44" height="14"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Espesor]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ab4fd9e1-2a4e-410b-b83c-e1a329f21b00" style="Encabezado de columnas" mode="Transparent" x="136" y="0" width="104" height="14"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Cant.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="18676e67-5906-4401-a743-d6ef22dfd69f" style="Encabezado de columnas" mode="Transparent" x="504" y="0" width="58" height="14"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Calidad]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="cc5f39d0-c8d4-4d85-9942-4842f3b08f23" style="Encabezado de columnas" mode="Transparent" x="692" y="0" width="100" height="14"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Observaciones]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="37ea1d2e-e0e3-4d80-8a44-f829eaa142ce" style="Encabezado de columnas" mode="Transparent" x="562" y="0" width="65" height="14"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Largo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ed4c85f8-38b5-426f-964f-cde891236127" style="Encabezado de columnas" mode="Transparent" x="344" y="0" width="116" height="14"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Material]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="24952344-9458-4a33-87c7-22d876c6f2dc" style="Encabezado de columnas" mode="Transparent" x="0" y="0" width="86" height="14" forecolor="#000000"/>
+				<textElement>
+					<font isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Subpiezas]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<textField>
+				<reportElement uuid="fcd624cf-722c-4869-ba2c-4420d2e7ba13" style="Row" mode="Transparent" x="460" y="0" width="44" height="12"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Materiales_espesor}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="445119e6-ab38-445b-ac96-3acc7cb3b6d9" style="Row" mode="Transparent" x="692" y="0" width="100" height="12"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Subpiezas_observaciones}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="756566da-8361-415f-8676-8af1900ad4b1" style="Row" mode="Transparent" x="344" y="0" width="116" height="12"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Materiales_tipo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="8c58ada7-c8e2-4e72-8071-5919d50309dc" style="Row" mode="Transparent" x="562" y="0" width="65" height="12"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Subpiezas_largo}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.0000;-###0.0000">
+				<reportElement uuid="d83a5175-7b48-4710-9ad8-c9c31cbb7ee6" style="Row" mode="Transparent" x="627" y="0" width="65" height="12"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Subpiezas_peso}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="5f5c8176-9935-4d77-8f8b-d83df620e485" style="Row" mode="Transparent" x="136" y="0" width="104" height="12"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Cantidad}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="3b834ed2-260b-49ac-8234-9226d82b1dcd" style="Row" mode="Transparent" x="86" y="0" width="50" height="12"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Subpiezas_elemento}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="cfc73971-f821-4f07-ae07-7a9f4c96de1e" style="Row" mode="Transparent" x="240" y="0" width="104" height="12"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Subpiezas_descripcion}.equals( null )? "" : $F{Subpiezas_descripcion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="764ec753-3ef8-40c4-a3d1-cca0004f1473" style="Row" mode="Transparent" x="504" y="0" width="58" height="12"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Materiales_calidad}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

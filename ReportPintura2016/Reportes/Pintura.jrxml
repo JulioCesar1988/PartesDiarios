@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Pintura" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2bffab6f-4868-467d-8ee2-3737ffa9dde7">
+	<property name="ireport.zoom" value="1.610510000000001"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="61"/>
+	<queryString>
+		<![CDATA[select *
+from pintura inner join piezas on (pintura.id_pieza = piezas.id_pieza )
+             inner join paquetes on (piezas.id_paquete = paquetes.id_paquete)
+             inner join obras on (paquetes.id_obra = obras.id_obra)
+
+where pintura.activado = 1
+]]>
+	</queryString>
+	<field name="id_pieza" class="java.lang.Integer"/>
+	<field name="id_empleado" class="java.lang.Integer"/>
+	<field name="fecha" class="java.sql.Timestamp"/>
+	<field name="activado" class="java.lang.Boolean"/>
+	<field name="id_paquete" class="java.lang.Integer"/>
+	<field name="elemento" class="java.lang.String"/>
+	<field name="correlatividad" class="java.lang.String"/>
+	<field name="descripcion" class="java.lang.String"/>
+	<field name="descripcion_extra" class="java.lang.String"/>
+	<field name="largo" class="java.lang.Integer"/>
+	<field name="pintura" class="java.lang.Boolean"/>
+	<field name="color" class="java.lang.String"/>
+	<field name="area" class="java.lang.String"/>
+	<field name="codigo" class="java.lang.Integer"/>
+	<field name="finalizado" class="java.lang.Boolean"/>
+	<field name="ubicacion" class="java.lang.String"/>
+	<field name="id_categoria" class="java.lang.Integer"/>
+	<field name="fecha_aprovacion_finalizacion" class="java.lang.String"/>
+	<field name="id_empleado_aprovo" class="java.lang.Integer"/>
+	<field name="id_obra" class="java.lang.Integer"/>
+	<field name="id_edificio" class="java.lang.Integer"/>
+	<field name="numero" class="java.lang.Integer"/>
+	<field name="numero_revision" class="java.lang.Integer"/>
+	<field name="soft_diseno" class="java.lang.String"/>
+	<field name="fecha_fabricacion" class="java.lang.String"/>
+	<field name="fecha_despacho" class="java.lang.String"/>
+	<field name="nombre" class="java.lang.String"/>
+	<field name="firma" class="java.lang.String"/>
+	<field name="cuit" class="java.lang.String"/>
+	<field name="direccion" class="java.lang.String"/>
+	<field name="localidad" class="java.lang.String"/>
+	<field name="provincia" class="java.lang.String"/>
+	<field name="pais" class="java.lang.String"/>
+	<field name="fecha_inicio" class="java.lang.String"/>
+	<field name="fecha_fin_estimada" class="java.lang.String"/>
+	<field name="fecha_fin_real" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<rectangle>
+				<reportElement x="0" y="0" width="555" height="79" uuid="2ce7ab87-2a37-4473-80ae-f2429ddd3686"/>
+			</rectangle>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch">
+			<rectangle>
+				<reportElement x="0" y="0" width="555" height="35" uuid="175632d0-917e-43d4-b47a-ba9acdb66d3d"/>
+			</rectangle>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="61" splitType="Stretch">
+			<rectangle>
+				<reportElement x="0" y="0" width="555" height="61" uuid="e1087099-cbfc-446a-93c0-c627c4a7ebe7"/>
+			</rectangle>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="125" splitType="Stretch">
+			<rectangle>
+				<reportElement x="0" y="0" width="555" height="125" uuid="6b2b0954-9269-4aff-8cf8-483525ee453d"/>
+			</rectangle>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

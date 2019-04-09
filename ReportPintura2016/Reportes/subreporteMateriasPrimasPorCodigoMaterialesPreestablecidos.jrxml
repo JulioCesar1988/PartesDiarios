@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reportePaqueteSubreporteSubpiezas" language="groovy" pageWidth="237" pageHeight="547" orientation="Landscape" columnWidth="237" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="11e26b55-bc8d-41af-9f17-5969778a2b3d">
+	<property name="ireport.zoom" value="1.3310000000000006"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Row" mode="Transparent" hAlign="Center" vAlign="Middle">
+		<box>
+			<pen lineColor="#000000"/>
+			<topPen lineWidth="1.0" lineColor="#000000"/>
+			<leftPen lineWidth="1.0" lineColor="#000000"/>
+			<bottomPen lineWidth="1.0" lineColor="#000000"/>
+			<rightPen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+			<style backcolor="#0000CC"/>
+		</conditionalStyle>
+	</style>
+	<parameter name="piezas_codigo" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[SELECT
+	Materiales.tipo as tipo,
+	Materiales.espesor as espesor,
+	Materiales.calidad as calidad
+
+FROM
+     Piezas
+     inner join Subpiezas
+     inner join Materiales
+     on Materiales.id_material=Subpiezas.id_material
+     on Piezas.id_pieza=Subpiezas.id_pieza
+
+WHERE
+     Piezas.codigo =$P{piezas_codigo}
+     and Piezas.activado=1
+     and Subpiezas.activado=1
+group by
+    Materiales.tipo,
+Materiales.espesor,
+	Materiales.calidad]]>
+	</queryString>
+	<field name="tipo" class="java.lang.String"/>
+	<field name="espesor" class="java.math.BigDecimal"/>
+	<field name="calidad" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<textField>
+				<reportElement style="Row" x="0" y="0" width="69" height="12" forecolor="#000000" uuid="f93563a3-4739-4825-a54b-d9ff4383408b"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="Row" x="69" y="0" width="44" height="12" uuid="af8aeebe-d57a-430b-85b1-f9cb213ec23f"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{espesor}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="Row" x="113" y="0" width="58" height="12" uuid="7b587020-3835-4a49-abe8-71a503f64cbe"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{calidad}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="Row" x="171" y="0" width="66" height="12" uuid="b1cfcdaa-01a2-4be7-9bc1-24f0162b7367"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[""]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

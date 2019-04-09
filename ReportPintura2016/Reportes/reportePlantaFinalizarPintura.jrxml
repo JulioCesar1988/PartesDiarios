@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reportePlantaFinalizarPintura" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="bed85da4-b1dc-4cb8-98a3-a988fdf47518">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="608"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Header Header" mode="Opaque" forecolor="#000000" backcolor="#0000CC" fill="Solid" fontName="DejaVu Sans" fontSize="10" isBold="true"/>
+	<style name="Titulo" mode="Transparent" forecolor="#000000" backcolor="#000000" fill="Solid" fontSize="22" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Fila" forecolor="#000000" backcolor="#F0F0F0" fontName="SansSerif" fontSize="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Datos" fontSize="8"/>
+	<parameter name="obras_num" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[$F{Obras_numero}]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select obras.numero as Obras_numero, obras.nombre as Obras_nombre, paquetes.fecha_fabricacion,
+cast(Paquetes.numero as varchar(10)) as Paquete,
+(Piezas.elemento + cast(Piezas.correlatividad as varchar(20))) as Pieza, piezas.codigo, Piezas.descripcion,
+Piezas.color, COUNT(piezas.id_pieza) as cantidad, CONVERT(varchar(11), getdate(), 103) as fecha_actual,aux.b as cantidad2
+from Piezas
+inner join Paquetes
+on Piezas.id_paquete=Paquetes.id_paquete inner join Obras on obras.id_obra=paquetes.id_obra
+left join (select piezas.codigo as a, COUNT(piezas.codigo) as b from Piezas where piezas.activado=1 group by piezas.codigo) as aux on piezas.codigo=aux.a
+where Piezas.id_pieza not in
+	(select Subpiezas.id_pieza from Subpiezas left join Subpiezas_Tareas
+	on Subpiezas.id_subpieza = Subpiezas_Tareas.id_subpieza
+	where Subpiezas_Tareas.id_tarea is null
+	or Subpiezas_Tareas.estado<>'finalizado')
+and Piezas.id_pieza not in
+	(select Pintura.id_pieza from Pintura)
+and Piezas.activado =1
+and Piezas.finalizado=0
+and Piezas.pintura = 1
+and piezas.finalizado =0
+and paquetes.activado=1
+and obras.numero=$P{obras_num}
+group by obras.numero, obras.nombre, paquetes.fecha_fabricacion, Paquetes.numero, Paquetes.numero_revision,
+Piezas.elemento, Piezas.correlatividad, piezas.codigo, Piezas.descripcion,
+Piezas.color,aux.b]]>
+	</queryString>
+	<field name="Obras_numero" class="java.lang.Integer"/>
+	<field name="Obras_nombre" class="java.lang.String"/>
+	<field name="fecha_fabricacion" class="java.lang.String"/>
+	<field name="Paquete" class="java.lang.String"/>
+	<field name="Pieza" class="java.lang.String"/>
+	<field name="codigo" class="java.lang.Integer"/>
+	<field name="descripcion" class="java.lang.String"/>
+	<field name="color" class="java.lang.String"/>
+	<field name="cantidad" class="java.lang.Integer"/>
+	<field name="fecha_actual" class="java.lang.String"/>
+	<field name="cantidad2" class="java.lang.Integer"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="87" splitType="Stretch">
+			<rectangle>
+				<reportElement uuid="cc5038e5-db56-4f47-afc1-8772b9089e49" mode="Transparent" x="596" y="0" width="205" height="63"/>
+			</rectangle>
+			<rectangle>
+				<reportElement uuid="b2e220b1-c814-4557-8221-fc02bb92c262" x="359" y="0" width="237" height="63"/>
+			</rectangle>
+			<staticText>
+				<reportElement uuid="29429c9e-5891-4bac-a5de-98e78f3efd1b" style="Titulo" x="61" y="0" width="298" height="29"/>
+				<textElement>
+					<font size="22" isBold="false" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Reporte de Pintura]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="f4fde369-7ede-4ec9-8fbc-a963005f8edd" style="Datos" x="364" y="0" width="232" height="20"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Obra: "+$F{Obras_numero} + " - "+ $F{Obras_nombre}]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement uuid="30cd45f4-7af1-432a-ad88-23b3127c3fe5" style="Titulo" mode="Transparent" x="0" y="0" width="359" height="63"/>
+			</rectangle>
+			<textField>
+				<reportElement uuid="d671bdfa-1311-442f-ab37-5c1618c8dd78" x="61" y="29" width="298" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["Fecha de emisión:"+$F{fecha_actual}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="d544a82d-ad4a-46a5-bfa2-97fdf40367a5" x="0" y="67" width="95" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha fab.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="82f7f60a-b921-4a9a-8336-5a4c48e139bf" x="95" y="67" width="56" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Paquete]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="754dfa56-f96e-40c1-824f-925f5d03f292" x="227" y="67" width="100" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Pieza]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="6022eafa-1a41-4265-99d5-4cea7105564b" x="327" y="67" width="52" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Código]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3fecb65c-b351-430d-8c52-ef0456b133fe" x="379" y="67" width="156" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Descripción]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="f9c329fd-991c-4fe5-b08c-8dbc0e17d224" x="535" y="67" width="100" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Color]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3ee014b4-91bc-44e1-9328-bef84152c9ab" x="635" y="67" width="100" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[A finalizar]]></text>
+			</staticText>
+			<line>
+				<reportElement uuid="7c32a6ba-4bfc-4e48-821e-455757f86b2d" x="0" y="86" width="802" height="1"/>
+			</line>
+			<staticText>
+				<reportElement uuid="73b61fc1-4d19-49b9-a0ce-33462dd41249" x="735" y="67" width="67" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Finalizadas]]></text>
+			</staticText>
+			<image>
+				<reportElement uuid="ebd44a57-8869-4eaa-8de9-752f09f6604d" style="Titulo" x="1" y="0" width="61" height="63"/>
+				<imageExpression><![CDATA["Reportes/logo01.jpg"]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement uuid="7e36bf37-bdd7-4038-b71a-6ab91103f86c" x="151" y="67" width="76" height="20"/>
+				<textElement>
+					<font fontName="DejaVu Sans" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cantidad]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="22">
+			<textField>
+				<reportElement uuid="080f170d-4009-4541-a91a-758942a30fe6" x="0" y="0" width="95" height="20"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fecha_fabricacion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="2a9c5dde-e232-4d80-aacb-e301f5154ea0" x="95" y="0" width="56" height="20"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Paquete}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="6f74746b-e082-4649-a530-a1aded1de552" x="227" y="0" width="100" height="20"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{Pieza}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="2333a822-947e-4063-ac55-de562d124229" x="327" y="0" width="52" height="20"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{codigo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="9eb882e1-b5e8-4288-b917-944773ec42ba" x="379" y="0" width="156" height="20"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="8847335b-4bea-43cc-b686-04477b1755e6" x="535" y="0" width="100" height="20"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{color}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="3602d2c3-7022-4fee-bfc5-e86d6151bc1f" x="635" y="0" width="100" height="20"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cantidad}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement uuid="33b41ebb-784f-475f-959c-2d45d3a9ac56" x="0" y="19" width="802" height="1"/>
+			</line>
+			<rectangle>
+				<reportElement uuid="cb538539-09de-4490-9601-f3f161d09678" mode="Transparent" x="735" y="0" width="67" height="19"/>
+			</rectangle>
+			<textField>
+				<reportElement uuid="648c32e8-e420-41e4-836b-bbc9d6d0c56f" x="151" y="0" width="76" height="20"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{cantidad2}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="15"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="20" splitType="Stretch">
+			<rectangle>
+				<reportElement uuid="555fdb1c-9827-45a8-afa6-0ff2bfb8e5e1" x="1" y="0" width="801" height="20"/>
+			</rectangle>
+			<textField>
+				<reportElement uuid="df903e9d-340b-4254-a5f5-5b7c2f1e4fd2" x="681" y="0" width="80" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Pag. "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement uuid="07ae4d02-6b91-4cb1-a784-26b84427c6cc" x="761" y="0" width="40" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

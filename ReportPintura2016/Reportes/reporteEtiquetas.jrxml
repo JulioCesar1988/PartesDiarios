@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteEtiquetas" language="groovy" pageWidth="459" pageHeight="842" columnWidth="459" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="ad1a3a1c-efa4-49e1-aae9-e6f8428f49c4">
+	<property name="ireport.zoom" value="1.3310000000000006"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="obraNumero" class="java.lang.Integer"/>
+	<parameter name="obraNombre" class="java.lang.String"/>
+	<parameter name="paqueteNumero" class="java.lang.Integer"/>
+	<field name="parametro1" class="java.lang.String"/>
+	<field name="parametro2" class="java.lang.String"/>
+	<field name="parametro3" class="java.lang.String"/>
+	<field name="parametro4" class="java.lang.String"/>
+	<title>
+		<band height="60" splitType="Stretch">
+			<textField>
+				<reportElement uuid="e94423d0-721b-4263-bef7-1639ca6fde20" x="0" y="0" width="180" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$P{obraNumero}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="8614585a-ea91-43d1-9ecf-d96a090e8d8e" x="0" y="20" width="180" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$P{obraNombre}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="b88f7e92-9bdc-4a55-9ee7-d601f538ccc6" x="0" y="40" width="180" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$P{paqueteNumero}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<detail>
+		<band height="21" splitType="Stretch">
+			<textField>
+				<reportElement uuid="5e4f509b-126e-4744-b73f-be4b71ce4c2b" x="288" y="0" width="136" height="21"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["@             "+$F{parametro3}+"@"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="2bf4b63f-0666-43dc-a914-1a0d052489fd" x="224" y="0" width="64" height="21"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{parametro2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="852b9315-b786-4407-bbbc-67ae3de93eb0" x="424" y="0" width="100" height="21"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{parametro4}+"@"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="1dd06499-d017-418d-96bf-b70f81b68b0c" x="0" y="0" width="224" height="21"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{parametro1}+"@"]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

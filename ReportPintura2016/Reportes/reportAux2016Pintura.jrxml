@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reportAux2016Pintura" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="1918ccc8-fb4d-4e70-991b-a7b81d126f02">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="fecha1" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fecha2" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT   COUNT(distinct(PIEZAS.ID_PIEZA))	 AS CANTIDADPIEZA,
+         OBRAS.NUMERO       		 AS NUMERO_OBRA,
+         OBRAS.NOMBRE		 AS NOMBRE_OBRA,
+         PAQUETES.NUMERO	           AS NUMERO_PAQUETE,
+         PIEZAS.CORRELATIVIDAD		 AS CORRELATIVIDAD_PIEZA,
+         PIEZAS.DESCRIPCION		 AS DESCRIPCION_PIEZA,
+         PIEZAS.ELEMENTO		 AS ELEMENTO_PIEZA,
+         SUM(SUBPIEZAS.PESO)		 AS PESO,
+         PIEZAS.AREA			 AS AREA_PIEZA,
+         pintura.fecha                    AS FechaFinalizacido
+
+FROM (SELECT * FROM PINTURA WHERE ACTIVADO = 1)PINTURA INNER JOIN (SELECT * FROM PIEZAS WHERE ACTIVADO = 1)AS PIEZAS          ON (PINTURA.ID_PIEZA = PIEZAS.ID_PIEZA       )
+             INNER JOIN (SELECT * FROM SUBPIEZAS WHERE ACTIVADO =1)AS SUBPIEZAS          ON (PIEZAS.ID_PIEZA = SUBPIEZAS.ID_PIEZA     )
+             INNER JOIN (SELECT * FROM PAQUETES WHERE ACTIVADO = 1)AS PAQUETES           ON (PIEZAS.ID_PAQUETE = PAQUETES.ID_PAQUETE  )
+             INNER JOIN (SELECT * FROM OBRAS WHERE ACTIVADO = 1)   AS OBRAS              ON (PAQUETES.ID_OBRA = OBRAS.ID_OBRA         )
+
+
+
+WHERE
+      OBRAS.ACTIVADO     = 1   AND
+      PAQUETES.ACTIVADO  = 1   AND
+      PINTURA.ACTIVADO   = 1   AND
+      PIEZAS.ACTIVADO    = 1   AND
+      OBRAS.ACTIVADO     = 1   AND
+      PIEZAS.ACTIVADO    = 1   AND
+      PAQUETES.ACTIVADO  = 1   AND
+      SUBPIEZAS.ACTIVADO = 1   and (CAST(PINTURA.FECHA AS DATE) BETWEEN  $P{fecha1} AND $P{fecha2})
+
+GROUP BY   PIEZAS.AREA,
+           PIEZAS.CORRELATIVIDAD,
+           PIEZAS.ELEMENTO,
+           OBRAS.NOMBRE,
+           OBRAS.NUMERO,
+           PAQUETES.NUMERO,
+           PIEZAS.DESCRIPCION,
+           pintura.fecha]]>
+	</queryString>
+	<field name="CANTIDADPIEZA" class="java.lang.Integer"/>
+	<field name="NUMERO_OBRA" class="java.lang.Integer"/>
+	<field name="NOMBRE_OBRA" class="java.lang.String"/>
+	<field name="NUMERO_PAQUETE" class="java.lang.Integer"/>
+	<field name="CORRELATIVIDAD_PIEZA" class="java.lang.String"/>
+	<field name="DESCRIPCION_PIEZA" class="java.lang.String"/>
+	<field name="ELEMENTO_PIEZA" class="java.lang.String"/>
+	<field name="PESO" class="java.math.BigDecimal"/>
+	<field name="AREA_PIEZA" class="java.lang.String"/>
+	<field name="FechaFinalizacido" class="java.sql.Timestamp"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch">
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="149" y="15" width="100" height="20" uuid="19b88aff-f8de-4bea-95ba-da052c51a391"/>
+				<textElement>
+					<font isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{fecha1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="450" y="15" width="100" height="20" uuid="d3de4338-ee96-4a9e-9c78-d1b50270d1d5"/>
+				<textElement>
+					<font isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{fecha2}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="24" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="106" height="24" uuid="ef7d64a2-79e7-453d-8888-1e9e9eefb61c"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="false" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Cantidad]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="106" y="0" width="111" height="24" uuid="8f919470-42d5-4cce-8381-818411aa539f"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="false" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Obra]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="217" y="0" width="101" height="24" uuid="a7fb1045-2c49-42ac-a02d-d93bfbedbe9c"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="false" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Paquete]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="318" y="0" width="100" height="24" uuid="9333d588-a26c-4de3-8122-1b3478aae12a"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="false" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Posicion]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="419" y="0" width="100" height="24" uuid="bcf87aac-3d36-4d84-96ab-866e1af2014e"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="false" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Peso]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="519" y="0" width="113" height="24" uuid="47157344-f66b-4576-8673-b8253231360c"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12" isBold="false" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Finalizado ]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="106" height="12" uuid="25ca8ac3-5bb2-4fbe-8bf0-6e32dfaa809c"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CANTIDADPIEZA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="106" y="0" width="111" height="12" uuid="89f8dd19-8b19-4605-b305-c496f6af1356"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NUMERO_OBRA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="217" y="0" width="100" height="12" uuid="1062e146-3fbb-40eb-ae33-652ed81fdd6c"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NUMERO_PAQUETE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00">
+				<reportElement x="419" y="0" width="100" height="12" uuid="6822d987-40df-4fad-ac13-db2e8b02b68e"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PESO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="318" y="0" width="100" height="12" uuid="7aa4e8fa-2e6d-4e7b-841f-97645a624193"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ELEMENTO_PIEZA}+""+$F{CORRELATIVIDAD_PIEZA}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" pattern="dd/MM/yyyy">
+				<reportElement x="519" y="0" width="113" height="12" uuid="6548493b-bffe-490b-bdb0-b66b8583f252"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="8" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FechaFinalizacido}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

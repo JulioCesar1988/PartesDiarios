@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteProduccionFaltanteListado" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="f5584f9c-58c5-46fc-a5ad-b101332601f4">
+	<property name="ireport.zoom" value="1.4641000000000013"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="obraNumero" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="todasLasObras" class="java.lang.Boolean">
+		<defaultValueExpression><![CDATA[false]]></defaultValueExpression>
+	</parameter>
+	<parameter name="subcategorias" class="java.lang.Boolean">
+		<defaultValueExpression><![CDATA[false]]></defaultValueExpression>
+	</parameter>
+	<parameter name="categoria" class="java.lang.String">
+		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[declare @obra int
+declare @subcategorias bit
+declare @todasLasObras bit
+declare @categoria varchar (50)
+set @obra = $P{obraNumero}
+set @todasLasObras=$P{todasLasObras}
+set @subcategorias=$P{subcategorias}
+set @categoria=$P{categoria}
+
+
+/***********Esta parte hace una agrupacion solo por categoria*/
+select
+	Paquetes.numero as listaNum, Paquetes.descripcion as listaDesc,
+	COUNT (distinct (Piezas.id_pieza)) as piezaCantidad, Piezas.elemento + Piezas.correlatividad as elemento, Piezas.descripcion,
+	cast ((Sum(Subpiezas.peso)) as int) as piezasPeso, Categoria_Ctrl_Produccion.categoria
+	from Obras
+	inner join Paquetes
+	inner join Piezas
+	inner join Subpiezas
+	on Piezas.id_pieza=Subpiezas.id_pieza
+	on Paquetes.id_paquete=Piezas.id_paquete
+	on Obras.id_obra=Paquetes.id_obra
+	left join Categoria_Ctrl_Produccion on Piezas.id_categoria=Categoria_Ctrl_Produccion.id_categoria
+	inner join Paquete_Empleado_Enviado
+	on Paquete_Empleado_Enviado.id_paquete=Paquetes.id_paquete
+	where
+	(Obras.numero=@obra or @todasLasObras=1)
+	and Piezas.area<>'warehouse'
+	and Subpiezas.id_subpieza in (
+						select Subpiezas.id_subpieza from Obras
+						inner join Paquetes
+						inner join Piezas
+						inner join Subpiezas
+						inner join Subpiezas_Tareas
+						on Subpiezas.id_subpieza=Subpiezas_Tareas.id_subpieza
+						on Piezas.id_pieza=Subpiezas.id_pieza
+						on Paquetes.id_paquete=Piezas.id_paquete
+						on Obras.id_obra=Paquetes.id_obra
+						where (Obras.numero=@obra or @todasLasObras=1)
+						and Subpiezas_Tareas.fecha_finalizado is null)
+	and Paquetes.activado=1
+	and Obras.activado=1
+	and Piezas.activado=1
+	and Subpiezas.activado=1
+	and Paquete_Empleado_Enviado.activado=1
+	and (categoria=@categoria or @categoria is null)
+
+	group by Categoria_Ctrl_Produccion.categoria, Categoria_Ctrl_Produccion.codigo,
+	Piezas.elemento, Piezas.correlatividad, Piezas.descripcion, Paquetes.numero, Paquetes.descripcion
+	order by categoria, Paquetes.numero]]>
+	</queryString>
+	<field name="listaNum" class="java.lang.Integer"/>
+	<field name="listaDesc" class="java.lang.String"/>
+	<field name="piezaCantidad" class="java.lang.Integer"/>
+	<field name="elemento" class="java.lang.String"/>
+	<field name="descripcion" class="java.lang.String"/>
+	<field name="piezasPeso" class="java.lang.Integer"/>
+	<field name="categoria" class="java.lang.String"/>
+	<variable name="Total Faltante" class="java.lang.Integer" calculation="Sum">
+		<variableExpression><![CDATA[$F{piezaCantidad}]]></variableExpression>
+	</variable>
+	<variable name="CantidadLista" class="java.lang.Integer" resetType="Group" resetGroup="ListaNum" calculation="Sum">
+		<variableExpression><![CDATA[$F{piezaCantidad}]]></variableExpression>
+	</variable>
+	<variable name="CantidadSector" class="java.lang.Integer" resetType="Group" resetGroup="categoria" calculation="Sum">
+		<variableExpression><![CDATA[$F{piezaCantidad}]]></variableExpression>
+	</variable>
+	<group name="categoria">
+		<groupExpression><![CDATA[$F{categoria}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<textField>
+					<reportElement uuid="22e0bd54-5a6a-4ce4-b4af-011588e5614a" x="0" y="0" width="234" height="20" forecolor="#660000"/>
+					<textElement>
+						<font size="14" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Categoría: "+$F{categoria}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="31">
+				<rectangle radius="10">
+					<reportElement uuid="6f61df4c-7cf5-4279-9341-d4b0086133bb" x="74" y="6" width="455" height="18"/>
+				</rectangle>
+				<textField>
+					<reportElement uuid="a574d758-bedb-4443-b304-d7d6d954a671" x="100" y="6" width="302" height="18"/>
+					<textElement markup="none">
+						<font size="12" isBold="true" isItalic="true" isUnderline="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Total de piezas faltantes en "+  $F{categoria} + ": "]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement uuid="cc674926-ebd8-49fc-8267-dbca0590436f" x="402" y="6" width="112" height="18"/>
+					<textElement textAlignment="Right">
+						<font size="12"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{CantidadSector}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="ListaNum">
+		<groupExpression><![CDATA[$F{listaNum}]]></groupExpression>
+		<groupHeader>
+			<band height="29">
+				<line>
+					<reportElement uuid="f9c439f7-ea21-4ac6-8e97-9e235e9241f4" x="0" y="15" width="555" height="1" forecolor="#990000"/>
+				</line>
+				<textField>
+					<reportElement uuid="708f8e35-864f-496c-9e63-41a6d10cd59c" x="0" y="1" width="376" height="15" forecolor="#990000"/>
+					<textElement>
+						<font size="11" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Número de lista: " + $F{listaNum} + " - " + $F{listaDesc}]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement uuid="9ba814b8-3f47-4c57-9e32-9d01c326dbfa" x="0" y="0" width="555" height="1" forecolor="#990000"/>
+					<graphicElement>
+						<pen lineWidth="3.0"/>
+					</graphicElement>
+				</line>
+				<staticText>
+					<reportElement uuid="397df223-bc5a-4df3-a8d6-fadd71817959" x="4" y="15" width="96" height="14"/>
+					<textElement>
+						<font isBold="true" isItalic="true"/>
+					</textElement>
+					<text><![CDATA[Elemento]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="d57f66a6-67c7-44e7-916e-eb1dbfe032ea" x="103" y="15" width="131" height="14"/>
+					<textElement>
+						<font isBold="true" isItalic="true"/>
+					</textElement>
+					<text><![CDATA[Descripción]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="cc2c37f1-e4af-4dc8-b0de-e2a6800b5280" x="240" y="15" width="100" height="14"/>
+					<textElement>
+						<font isBold="true" isItalic="true"/>
+					</textElement>
+					<text><![CDATA[Peso]]></text>
+				</staticText>
+				<staticText>
+					<reportElement uuid="fa40256e-18e7-45e4-bf34-f5c3d2073b07" x="444" y="15" width="110" height="14"/>
+					<textElement>
+						<font isBold="true" isItalic="true"/>
+					</textElement>
+					<text><![CDATA[Cantidad de faltantes]]></text>
+				</staticText>
+				<textField>
+					<reportElement uuid="9766551d-662e-43f2-8d00-0a4c4a42dd89" x="376" y="1" width="160" height="15" forecolor="#990000"/>
+					<textElement textAlignment="Right">
+						<font size="11" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Categoría " +  $F{categoria}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="29">
+				<rectangle radius="10">
+					<reportElement uuid="7e207a3f-11ce-46b7-9a8c-8938c66196c3" x="50" y="4" width="479" height="15"/>
+				</rectangle>
+				<textField>
+					<reportElement uuid="2fa4a380-47ba-4f8d-a871-98d3450712c4" x="74" y="4" width="328" height="14"/>
+					<textElement markup="none">
+						<font size="10" isBold="true" isItalic="true" isUnderline="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Total de piezas faltantes en lista Nº "+ $F{listaNum} + ": "]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement uuid="c9c73fed-310c-411f-bb12-35fc27f2e36a" x="402" y="4" width="100" height="14"/>
+					<textElement textAlignment="Right"/>
+					<textFieldExpression><![CDATA[$V{CantidadLista}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="73" splitType="Stretch">
+			<rectangle>
+				<reportElement uuid="2022376a-0afd-4a37-be20-9ee2c26c5a87" mode="Transparent" x="0" y="0" width="555" height="73"/>
+			</rectangle>
+			<staticText>
+				<reportElement uuid="ae30f157-ad34-4a7b-9c0e-52e122a6cf7c" x="74" y="0" width="481" height="35" forecolor="#000000" backcolor="#000000"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="22" isBold="true" isItalic="true" pdfFontName="Times-Roman"/>
+				</textElement>
+				<text><![CDATA[Lista de estados de piezas por obra]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement uuid="bbf067e8-d548-4bc2-bad7-38dca799c6ea" x="476" y="60" width="78" height="13"/>
+				<textElement>
+					<font size="8" isBold="true" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="5564093b-f8b9-4ee0-b9b1-d0a837900682" x="376" y="60" width="100" height="13"/>
+				<textElement textAlignment="Right">
+					<font size="8" isBold="false" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Fecha impresión:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="9d5ae793-9d82-495d-bb1c-9beb422a2c36" x="87" y="53" width="115" height="20" forecolor="#333333" backcolor="#FFFFFF"/>
+				<textElement textAlignment="Right">
+					<font size="12" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Número de obra: ]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="8e42f7bf-7130-4c65-a6df-cb98f9423cac" x="202" y="53" width="100" height="20"/>
+				<textElement>
+					<font size="12" isBold="true" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{obraNumero}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="6" splitType="Stretch"/>
+	</pageHeader>
+	<detail>
+		<band height="12" splitType="Stretch">
+			<textField>
+				<reportElement uuid="06209897-732c-48c3-a1ff-3e5d424441b3" x="4" y="0" width="96" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{elemento}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="2cc985b8-ae62-4469-8342-25544a66728d" x="103" y="0" width="131" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="546f2b29-166b-4c23-8486-28197e86f0fb" x="239" y="0" width="100" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{piezasPeso}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="83668ea1-98d5-4843-af82-ea6df9c239a8" x="491" y="0" width="63" height="12"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{piezaCantidad}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<summary>
+		<band height="40" splitType="Stretch">
+			<rectangle radius="10">
+				<reportElement uuid="38475f11-7ba1-4956-9b69-c33c88ae6839" x="103" y="7" width="426" height="20"/>
+			</rectangle>
+			<textField>
+				<reportElement uuid="2c203a9a-81be-4a73-b2a1-3591edac3026" x="353" y="7" width="161" height="20"/>
+				<textElement textAlignment="Right">
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{Total Faltante}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="c34771dd-352d-4678-9489-0b22637d8d87" x="113" y="7" width="240" height="20"/>
+				<textElement>
+					<font size="15" isBold="true" isItalic="true" isUnderline="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL DE PIEZAS FALTANTES:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement uuid="0493d4de-7378-4565-82bf-d5a5a3250dc3" x="476" y="27" width="78" height="13"/>
+				<textElement>
+					<font size="8" isBold="true" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="c561ba4f-e37f-424f-b2cf-27b1d43b6d36" x="376" y="27" width="100" height="13"/>
+				<textElement textAlignment="Right">
+					<font size="8" isBold="false" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Fecha impresión:]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

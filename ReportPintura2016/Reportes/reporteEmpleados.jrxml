@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteEmpleados" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="0669ae7b-8d76-46bd-8c17-b87f8d7c6c31">
+	<property name="ireport.zoom" value="1.3310000000000006"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<style name="Fila" fontName="Verdana" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Header Header" mode="Opaque" forecolor="#000000" backcolor="#0000CC" fill="Solid" fontName="DejaVu Sans" fontSize="10" isBold="true"/>
+	<style name="Titulo" mode="Transparent" forecolor="#000000" backcolor="#000000" fontSize="22" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<subDataset name="dataset1" uuid="39d2f599-4212-4328-9a47-042e3c58596c"/>
+	<parameter name="orden" class="java.lang.String"/>
+	<parameter name="filtroSector" class="java.lang.String">
+		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
+	</parameter>
+	<parameter name="filtroEmpresa" class="java.lang.String">
+		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[declare @idFiltroSector int;
+set @idFiltroSector =(select Sectores_Empleado.id_sector from Sectores_Empleado
+					where Sectores_Empleado.nombre=$P{filtroSector}
+					and Sectores_Empleado.activado=1)
+declare @idfiltroEmpresa int;
+set @idfiltroEmpresa =(select Empresas.id_empresa from Empresas
+					where Empresas.nombre=$P{filtroEmpresa}
+					and Empresas.activado=1)
+
+
+select Empleados.apellido+', '+Empleados.nombre as nombreCompleto,
+cast(Empresas.nombre as varchar) as empresaNombre, Empleados.legajo,
+Sectores_Empleado.nombre as sector, Empleados.fecha_ingreso
+from Empleados
+left join Empresas
+on Empresas.id_empresa=Empleados.id_empresa
+left join Sectores_Empleado
+on Sectores_Empleado.id_sector=Empleados.id_sector
+where Empleados.activado=1
+and Empleados.fecha_egreso is null
+and (Empleados.id_empresa = @idfiltroEmpresa or @idfiltroEmpresa is null)
+and (Empleados.id_sector = @idFiltroSector or @idFiltroSector is null)
+ORDER BY
+  CASE
+  WHEN $P{orden} = 1 THEN CAST(Empleados.apellido AS sql_variant)
+  WHEN $P{orden} = 2 THEN Empleados.legajo
+  WHEN $P{orden} = 3 THEN Empleados.fecha_ingreso
+  WHEN $P{orden} = 4 THEN CAST(Sectores_Empleado.id_sector AS varchar)+' '+CAST( Empleados.apellido as varchar)
+  WHEN $P{orden} = 5 THEN CAST(Empleados.id_empresa AS varchar)+' '+CAST( Empleados.apellido as varchar)
+  ELSE NULL
+  END;]]>
+	</queryString>
+	<field name="nombreCompleto" class="java.lang.String"/>
+	<field name="empresaNombre" class="java.lang.String"/>
+	<field name="legajo" class="java.lang.Integer"/>
+	<field name="sector" class="java.lang.String"/>
+	<field name="fecha_ingreso" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="69" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="bd675c9b-2f32-4e58-96ae-c82a36a7a709" style="Titulo" x="61" y="0" width="234" height="29"/>
+				<textElement/>
+				<text><![CDATA[Reporte de Empleados]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="2fad19de-33a1-4846-860d-acdf768bd9ec" x="365" y="20" width="183" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["Filtro de Sector: " + $P{filtroSector}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="3f51a80a-dfbd-4b0e-a627-46eee48404f4" x="365" y="0" width="183" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["Filtro de Empresa: " + $P{filtroEmpresa}]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement uuid="ca5945e7-5cb3-4a71-8961-125f7487d59f" style="Titulo" x="361" y="0" width="194" height="63"/>
+			</rectangle>
+			<textField>
+				<reportElement uuid="68651646-96e6-4432-bb99-9fc101d274bf" x="365" y="40" width="183" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["Odenado por: " + (
+    $P{orden}.equals("1") ? "Apellido" :
+$P{orden}.equals("2" )? "Legajo" :
+$P{orden}.equals( "3" )? "Fecha de ingreso" :
+$P{orden}.equals( "4" )? "Sector, apellido" :
+$P{orden}.equals( "5" )? "Empresa, apellido" : ""
+
+    )]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement uuid="3f74b9da-3aac-4dc8-b825-141958652268" style="Titulo" x="0" y="0" width="61" height="63"/>
+				<imageExpression><![CDATA["Reportes/logo01.jpg"]]></imageExpression>
+			</image>
+			<rectangle>
+				<reportElement uuid="a41327c7-55b5-41aa-8267-68601135877c" style="Titulo" x="0" y="0" width="361" height="63"/>
+			</rectangle>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="14" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="e254c391-1f95-4499-9066-9665f066b622" style="Header Header" mode="Transparent" x="221" y="0" width="74" height="14"/>
+				<textElement/>
+				<text><![CDATA[Empresa]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="92122525-c263-4db6-a027-daffd0290b2d" style="Header Header" mode="Transparent" x="295" y="0" width="66" height="14"/>
+				<textElement/>
+				<text><![CDATA[Legajo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="14543d8b-3063-49b0-bfe6-e08ec5133616" style="Header Header" mode="Transparent" x="361" y="0" width="87" height="14"/>
+				<textElement/>
+				<text><![CDATA[Sector]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="8de0baca-7035-45f0-8253-6f9ff3408fbc" style="Header Header" mode="Transparent" x="448" y="0" width="100" height="14"/>
+				<textElement/>
+				<text><![CDATA[Fecha de ingreso]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="22b10181-d16f-4658-9f63-fc0984d9b6fc" style="Header Header" mode="Transparent" x="0" y="0" width="221" height="14"/>
+				<textElement/>
+				<text><![CDATA[Apellido y Nombre]]></text>
+			</staticText>
+			<line>
+				<reportElement uuid="84f700c7-f7f6-41e1-b812-d7cf676a5864" x="0" y="13" width="555" height="1"/>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<frame>
+				<reportElement uuid="9be1a4a6-45de-4b77-95ca-ae17517d3e66" style="Fila" x="0" y="0" width="555" height="13"/>
+				<textField>
+					<reportElement uuid="779543fd-3d77-473b-a8f2-99422c5869f6" x="5" y="0" width="216" height="13"/>
+					<textElement>
+						<font isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{nombreCompleto}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement uuid="261236f9-1d70-4b96-91af-21f0918c87cf" x="225" y="0" width="70" height="13"/>
+					<textElement>
+						<font isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{empresaNombre}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement uuid="0a3d721b-2464-47e8-9693-272626880a58" x="298" y="0" width="63" height="13"/>
+					<textElement>
+						<font isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{legajo}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement uuid="59e3c864-a905-44d6-93ff-f5c66d936943" x="365" y="0" width="83" height="13"/>
+					<textElement>
+						<font isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{sector}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement uuid="1f79bc70-3118-4dbb-86aa-f9fae34c4189" x="453" y="0" width="95" height="13"/>
+					<textElement>
+						<font isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{fecha_ingreso}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="24" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="20" splitType="Stretch">
+			<rectangle>
+				<reportElement uuid="1f1e18e4-787c-4fb2-82c2-08f6a4cf285e" x="0" y="0" width="555" height="20"/>
+			</rectangle>
+			<textField>
+				<reportElement uuid="0a2821b2-7275-4231-a674-fab11428a862" x="431" y="0" width="80" height="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Pag. "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement uuid="f6d5b7bb-85a0-4feb-8087-3b247c1ff3a4" x="511" y="0" width="40" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

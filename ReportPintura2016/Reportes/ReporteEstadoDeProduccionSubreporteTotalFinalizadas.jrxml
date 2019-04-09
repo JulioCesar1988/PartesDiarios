@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ReporteEstadoDeProduccionSubreporteTotalFinalizadas" language="groovy" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="62d4fbda-bcf6-4461-9694-660c5270fb58">
+	<property name="ireport.zoom" value="1.0000000000000004"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="style1" fontName="SansSerif" fontSize="13" isBold="false" isItalic="false" isUnderline="false"/>
+	<parameter name="obraNumero" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fechaInicio" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="fechaFin" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[declare @obra int
+declare @fechaInicio smalldatetime
+declare @fechaFin smalldatetime
+set @obra=$P{obraNumero}
+set @fechaInicio=$P{fechaInicio}
+set @fechaFin=$P{fechaFin}
+
+select * from
+(select count (piezas.id_pieza) totalEntreFechas
+from Obras
+inner join Paquetes
+inner join Piezas
+on Piezas.id_paquete=Paquetes.id_paquete
+on Paquetes.id_obra=Obras.id_obra
+inner join
+(select Obras.numero as obraNumero, Paquetes.numero as paqueteNumero, Paquete_Empleado_Creado.fecha as fechaCreado
+from Paquete_Empleado_Creado inner join Paquetes on Paquetes.id_paquete=Paquete_Empleado_Creado.id_paquete
+inner join Obras
+on Obras.id_obra=Paquetes.id_obra) as Aux
+on Aux.paqueteNumero=Paquetes.numero and Obras.numero=Aux.obraNumero
+inner join
+	(select Obras.numero as obraNumero, Paquetes.numero as paqueteNumero,CAST (Paquete_Empleado_Aprobado.fecha as DATE) as fechaAprovado
+	from Paquete_Empleado_Aprobado inner join Paquetes on Paquetes.id_paquete=Paquete_Empleado_Aprobado.id_paquete
+	inner join Obras on Obras.id_obra=Paquetes.id_obra) as AuxPaqueteAprovado
+	on AuxPaqueteAprovado.paqueteNumero=Paquetes.numero and Obras.numero=AuxPaqueteAprovado.obraNumero
+
+where Paquetes.activado=1
+and Obras.numero=@obra
+and Piezas.area<>'Warehouse'
+and Piezas.activado=1
+and fechaCreado>=@fechaInicio and fechaCreado<=@fechaFin) as aux1
+
+join
+
+(select count (piezas.id_pieza) totalTerminadoEntreFechas
+from Obras
+inner join Paquetes
+inner join Piezas
+on Piezas.id_paquete=Paquetes.id_paquete
+on Paquetes.id_obra=Obras.id_obra
+inner join
+(select Obras.numero as obraNumero, Paquetes.numero as paqueteNumero, Paquete_Empleado_Creado.fecha as fechaCreado
+from Paquete_Empleado_Creado inner join Paquetes on Paquetes.id_paquete=Paquete_Empleado_Creado.id_paquete
+inner join Obras
+on Obras.id_obra=Paquetes.id_obra) as Aux
+on Aux.paqueteNumero=Paquetes.numero and Obras.numero=Aux.obraNumero
+inner join
+	(select Obras.numero as obraNumero, Paquetes.numero as paqueteNumero,CAST (Paquete_Empleado_Aprobado.fecha as DATE) as fechaAprovado
+	from Paquete_Empleado_Aprobado inner join Paquetes on Paquetes.id_paquete=Paquete_Empleado_Aprobado.id_paquete
+	inner join Obras on Obras.id_obra=Paquetes.id_obra) as AuxPaqueteAprovado
+on AuxPaqueteAprovado.paqueteNumero=Paquetes.numero and Obras.numero=AuxPaqueteAprovado.obraNumero
+where Paquetes.activado=1
+and Obras.numero=@obra
+and Piezas.area<>'Warehouse'
+and Piezas.activado=1
+and Piezas.finalizado=1
+and fechaCreado>=@fechaInicio and fechaCreado<=@fechaFin
+
+) as aux2
+
+on 1=1
+
+join
+
+(select count (piezas.id_pieza) totalNoTerminadoEntreFechas
+from Obras
+inner join Paquetes
+inner join Piezas
+on Piezas.id_paquete=Paquetes.id_paquete
+on Paquetes.id_obra=Obras.id_obra
+inner join
+(select Obras.numero as obraNumero, Paquetes.numero as paqueteNumero, Paquete_Empleado_Creado.fecha as fechaCreado
+from Paquete_Empleado_Creado inner join Paquetes on Paquetes.id_paquete=Paquete_Empleado_Creado.id_paquete
+inner join Obras
+on Obras.id_obra=Paquetes.id_obra) as Aux
+on Aux.paqueteNumero=Paquetes.numero and Obras.numero=Aux.obraNumero
+inner join
+	(select Obras.numero as obraNumero, Paquetes.numero as paqueteNumero,CAST (Paquete_Empleado_Aprobado.fecha as DATE) as fechaAprovado
+	from Paquete_Empleado_Aprobado inner join Paquetes on Paquetes.id_paquete=Paquete_Empleado_Aprobado.id_paquete
+	inner join Obras on Obras.id_obra=Paquetes.id_obra) as AuxPaqueteAprovado
+on AuxPaqueteAprovado.paqueteNumero=Paquetes.numero and Obras.numero=AuxPaqueteAprovado.obraNumero
+where Paquetes.activado=1
+and Obras.numero=@obra
+and Piezas.area<>'Warehouse'
+and Piezas.activado=1
+and Piezas.finalizado=0
+and fechaCreado>=@fechaInicio and fechaCreado<=@fechaFin
+
+) as aux3
+
+on 1=1]]>
+	</queryString>
+	<field name="totalEntreFechas" class="java.lang.Integer"/>
+	<field name="totalTerminadoEntreFechas" class="java.lang.Integer"/>
+	<field name="totalNoTerminadoEntreFechas" class="java.lang.Integer"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="87" splitType="Stretch">
+			<textField>
+				<reportElement uuid="8d7d7c07-b827-4140-b627-714b06535762" style="style1" x="371" y="27" width="200" height="20"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{totalEntreFechas}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="0b8ac3cd-da08-4732-b2e4-d67af9f505aa" style="style1" x="102" y="47" width="232" height="20"/>
+				<textElement/>
+				<text><![CDATA[Total de piezas cargadas finalizadas]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="05f9f17f-59a9-44c1-a74d-57e59f028aa7" style="style1" x="371" y="47" width="200" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{totalTerminadoEntreFechas}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="fa25fdcf-aeae-47c3-9b08-a5a201ef76c1" style="style1" x="13" y="3" width="558" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["Reporte de estado de producción entre las fechas " + $P{fechaInicio} + " y " + $P{fechaFin}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="d214397d-567a-41e4-a099-fc45d23b93df" style="style1" x="102" y="27" width="232" height="20"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total de piezas cargadas]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="bcc60ee7-e936-4029-b107-28d9ac171ffa" style="style1" x="102" y="67" width="232" height="20"/>
+				<textElement/>
+				<text><![CDATA[Total de piezas cargadas no finalizadas]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="7cb338f4-4fa5-4d28-8f21-8cacb3b64c81" style="style1" x="371" y="67" width="200" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{totalNoTerminadoEntreFechas}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement uuid="4eed1aa3-f47f-44cc-895d-5e483060990e" x="0" y="24" width="595" height="1"/>
+				<graphicElement>
+					<pen lineStyle="Dotted"/>
+				</graphicElement>
+			</line>
+		</band>
+	</detail>
+</jasperReport>

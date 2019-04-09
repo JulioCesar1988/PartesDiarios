@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteProduccionPorKgPorObra" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="8a82718a-f1e7-45f0-ae9c-70e7ec1436eb">
+	<property name="ireport.zoom" value="1.6105100000000014"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="desde" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="hasta" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="subcategorias" class="java.lang.Boolean">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[declare @desde date
+declare @hasta date
+declare @subcategorias bit
+
+
+
+set @desde =$P{desde}
+set @hasta =$P{hasta}
+set @subcategorias=$P{subcategorias}
+
+
+
+
+begin
+	if @subcategorias=0
+	begin
+		/***********Esta parte hace unaagrupacion solo por categoria*/
+		select obras.numero, obras.nombre,
+		Categoria_Ctrl_Produccion.categoria, Categoria_Ctrl_Produccion.codigo,
+		COUNT (distinct (Piezas.id_pieza)) as piezaCantidad,
+		cast ((Sum(Subpiezas.peso) ) as decimal (15, 3)) as piezasPeso
+		from Obras
+		inner join Paquetes
+		inner join Piezas
+		inner join Subpiezas
+		on Piezas.id_pieza=Subpiezas.id_pieza
+		on Paquetes.id_paquete=Piezas.id_paquete
+		on Obras.id_obra=Paquetes.id_obra
+		left join Categoria_Ctrl_Produccion on Piezas.id_categoria=Categoria_Ctrl_Produccion.id_categoria
+		where
+		Piezas.fecha_aprovacion_finalizacion between @desde and @hasta
+		and Paquetes.activado=1
+		and Piezas.activado=1
+		and Subpiezas.activado=1
+		group by
+		Categoria_Ctrl_Produccion.categoria, Categoria_Ctrl_Produccion.codigo, obras.numero, obras.nombre
+		order by  Obras.numero, Categoria_Ctrl_Produccion.categoria
+	end
+	else
+	begin
+		/***********Esta parte hace una agrupacion por categoria y subcategoria*/
+		Select obras.numero, obras.nombre,
+		Categoria_Ctrl_Produccion.categoria +
+		CASE
+			 WHEN (Categoria_Ctrl_Produccion.subcategoria is NULL
+					or Categoria_Ctrl_Produccion.subcategoria='' ) THEN ''
+			 ELSE ' - '+Categoria_Ctrl_Produccion.subcategoria END as categoria,
+		Categoria_Ctrl_Produccion.codigo +
+		CASE
+			 WHEN (Categoria_Ctrl_Produccion.codigo_subcategoria is NULL
+					or Categoria_Ctrl_Produccion.codigo_subcategoria='' ) THEN ''
+			 ELSE ' - '+Categoria_Ctrl_Produccion.codigo_subcategoria END as codigo,
+
+		COUNT (distinct (Piezas.id_pieza)) as piezaCantidad,
+		cast ((Sum(Subpiezas.peso) ) as decimal (15, 3)) as piezasPeso
+		from Obras
+		inner join Paquetes
+		inner join Piezas
+		inner join Subpiezas
+		on Piezas.id_pieza=Subpiezas.id_pieza
+		on Paquetes.id_paquete=Piezas.id_paquete
+		on Obras.id_obra=Paquetes.id_obra
+		left join Categoria_Ctrl_Produccion on Piezas.id_categoria=Categoria_Ctrl_Produccion.id_categoria
+
+
+		where @subcategorias=1
+		and Piezas.fecha_aprovacion_finalizacion between @desde and @hasta
+		and Paquetes.activado=1
+		and Piezas.activado=1
+		and Subpiezas.activado=1
+
+		group by Categoria_Ctrl_Produccion.categoria, Categoria_Ctrl_Produccion.codigo,
+		Categoria_Ctrl_Produccion.subcategoria, Categoria_Ctrl_Produccion.codigo_subcategoria, obras.numero, obras.nombre
+		order by Obras.numero, Categoria_Ctrl_Produccion.categoria
+	end
+end]]>
+	</queryString>
+	<field name="numero" class="java.lang.Integer"/>
+	<field name="nombre" class="java.lang.String"/>
+	<field name="categoria" class="java.lang.String"/>
+	<field name="codigo" class="java.lang.String"/>
+	<field name="piezaCantidad" class="java.lang.Integer"/>
+	<field name="piezasPeso" class="java.math.BigDecimal"/>
+	<variable name="sumaObraPeso" class="java.lang.Number" resetType="Group" resetGroup="groupObra" calculation="Sum">
+		<variableExpression><![CDATA[$F{piezasPeso}]]></variableExpression>
+	</variable>
+	<variable name="sumaObraCantidad" class="java.lang.Number" resetType="Group" resetGroup="groupObra" calculation="Sum">
+		<variableExpression><![CDATA[$F{piezaCantidad}]]></variableExpression>
+	</variable>
+	<variable name="sumaReportePeso" class="java.lang.Number" resetType="Group" resetGroup="groupReporte" calculation="Sum">
+		<variableExpression><![CDATA[$F{piezasPeso}]]></variableExpression>
+	</variable>
+	<variable name="sumaReporteCantidad" class="java.lang.Number" resetType="Group" resetGroup="groupReporte" calculation="Sum">
+		<variableExpression><![CDATA[$F{piezaCantidad}]]></variableExpression>
+	</variable>
+	<group name="groupReporte">
+		<groupExpression><![CDATA[$P{REPORT_CONNECTION}]]></groupExpression>
+		<groupFooter>
+			<band height="50">
+				<textField pattern="###0;-###0">
+					<reportElement mode="Opaque" x="288" y="0" width="100" height="20" forecolor="#333333" backcolor="#CCCCCC" uuid="bd81105c-a12a-4b32-b2f8-52eb01d64cc8"/>
+					<textElement textAlignment="Right">
+						<font size="14" isBold="true" isItalic="false" isUnderline="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{sumaReporteCantidad}]]></textFieldExpression>
+				</textField>
+				<textField pattern="###0.000;-###0.000">
+					<reportElement mode="Opaque" x="388" y="0" width="100" height="20" forecolor="#333333" backcolor="#CCCCCC" uuid="458dcee7-646b-41e1-b8e3-09703ff25dc3"/>
+					<textElement textAlignment="Right">
+						<font size="14" isBold="true" isItalic="false" isUnderline="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{sumaReportePeso}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Opaque" x="0" y="0" width="300" height="20" forecolor="#333333" backcolor="#CCCCCC" uuid="15ba6985-9e86-43d6-b40f-a1bb80524a72"/>
+					<textElement textAlignment="Right" markup="none">
+						<font size="14" isBold="true" isItalic="false" isUnderline="false"/>
+					</textElement>
+					<text><![CDATA[Totales:]]></text>
+				</staticText>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="groupObra">
+		<groupExpression><![CDATA[$F{numero}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<textField>
+					<reportElement mode="Opaque" x="0" y="0" width="555" height="20" forecolor="#FFFFFF" backcolor="#999999" uuid="4ad21746-a8a0-4db9-b74c-ce740e966ead"/>
+					<textElement>
+						<font size="12" isBold="true" isItalic="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Obra Nº " + $F{numero} + " - " + $F{nombre}]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement x="288" y="7" width="100" height="13" forecolor="#FFFFFF" uuid="721d5732-c492-4731-a5f8-b34461ac1853"/>
+					<textElement textAlignment="Right">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Unidades]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="388" y="7" width="100" height="13" forecolor="#FFFFFF" uuid="105da0de-3740-481c-a1a2-54f165129091"/>
+					<textElement textAlignment="Right">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Peso]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="20">
+				<textField pattern="###0.000;-###0.000">
+					<reportElement mode="Opaque" x="388" y="0" width="100" height="14" forecolor="#333333" backcolor="#CCCCCC" uuid="2b8fa905-ca93-4a97-b5e2-701c7b0e5af2"/>
+					<textElement textAlignment="Right">
+						<font size="10" isBold="true" isItalic="true" isUnderline="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{sumaObraPeso}]]></textFieldExpression>
+				</textField>
+				<textField pattern="###0;-###0">
+					<reportElement mode="Opaque" x="288" y="0" width="100" height="14" forecolor="#333333" backcolor="#CCCCCC" uuid="893a9767-894d-4dba-a54c-d3f51d135338"/>
+					<textElement textAlignment="Right">
+						<font isBold="true" isItalic="true" isUnderline="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$V{sumaObraCantidad}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="76" splitType="Stretch">
+			<textField>
+				<reportElement x="98" y="30" width="215" height="20" uuid="42e9e571-f254-4c75-b4b5-7578be212e3e"/>
+				<textElement>
+					<font size="12" isBold="true" isUnderline="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["("+$P{desde}+" al "+$P{hasta}+")"]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement mode="Transparent" x="361" y="0" width="194" height="63" uuid="294d9563-66ec-4c65-af6c-7e91fec4bd83"/>
+			</rectangle>
+			<rectangle>
+				<reportElement mode="Transparent" x="0" y="0" width="361" height="63" uuid="1b371268-1d97-4111-a4c5-a9cce0aee51f"/>
+			</rectangle>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="463" y="46" width="92" height="14" uuid="aaa81e2a-3379-4758-af10-a1c891cd54c8"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="361" y="46" width="102" height="14" uuid="ce8c74ca-5ea5-465f-a02d-3a919fb5cae0"/>
+				<textElement textAlignment="Right">
+					<font isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Fecha de impresión: ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="61" y="0" width="300" height="29" uuid="31ac5744-c9c3-4499-a3f0-6ef311b55912"/>
+				<textElement>
+					<font size="18" isUnderline="true" isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[Infome de Producción según Obra]]></text>
+			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band height="13" splitType="Stretch">
+			<textField>
+				<reportElement x="25" y="0" width="263" height="13" uuid="10ec4b8b-04e3-41ef-8f54-33a024c574b1"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{categoria} +  " (" +$F{codigo} + ")"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="288" y="0" width="100" height="13" uuid="4083ec43-bfc0-4d84-b625-d420b60b8d84"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{piezaCantidad}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="388" y="0" width="100" height="13" uuid="bfc7d639-9f5d-42e2-8d5d-308cb32f7c84"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{piezasPeso}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="20" splitType="Stretch">
+			<rectangle>
+				<reportElement mode="Transparent" x="0" y="0" width="555" height="20" uuid="280b6bef-8ce1-4fa0-a786-34ff65e4a5c5"/>
+			</rectangle>
+			<textField evaluationTime="Report">
+				<reportElement mode="Transparent" x="511" y="0" width="40" height="20" uuid="35bb6ee7-2c5a-404f-839b-226600681665"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="431" y="0" width="80" height="20" uuid="b56d9d93-24bb-4275-962b-c57f70a89b76"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Pag. "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

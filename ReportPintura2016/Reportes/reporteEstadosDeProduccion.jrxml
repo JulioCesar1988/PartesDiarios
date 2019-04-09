@@ -1,0 +1,782 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporteFaltantesDeObra" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="ed755a2b-c45a-4087-8f03-485ae77d65d8">
+	<property name="ireport.zoom" value="1.7715610000000512"/>
+	<property name="ireport.x" value="91"/>
+	<property name="ireport.y" value="48"/>
+	<style name="SubTitle" forecolor="#736343" fontName="Arial" fontSize="18"/>
+	<style name="Column header" forecolor="#666666" fontSize="10" isBold="false" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Detail" fontName="Arial" fontSize="12"/>
+	<style name="Row" mode="Transparent">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$V{REPORT_COUNT}%2 == 0]]></conditionExpression>
+			<style backcolor="#0000CC"/>
+		</conditionalStyle>
+	</style>
+	<style name="Encabezado de columnas" forecolor="#666666" isBlankWhenNull="true" fontSize="10" isBold="true" isItalic="true" isUnderline="false" isStrikeThrough="false"/>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<style name="Tabla de control" vAlign="Middle" fontSize="8"/>
+	<style name="Tabla de control Datos" vAlign="Middle" fontSize="7" isItalic="true"/>
+	<style name="Title" fontName="Times New Roman" fontSize="30" isBold="true" pdfFontName="Times-Bold"/>
+	<style name="style1">
+		<pen lineStyle="Double"/>
+	</style>
+	<style name="Column header estatico" forecolor="#000000" fontName="SansSerif" fontSize="10" isBold="true" isItalic="true"/>
+	<style name="Separadoras Rojas">
+		<pen lineStyle="Double" lineColor="#990000"/>
+	</style>
+	<style name="Footer Grupo Piezas" fontSize="8" isBold="true" isItalic="false" isUnderline="false"/>
+	<style name="CondicionalListaProducidas" mode="Opaque">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[
+(
+    ($V{totalProducidas} != $V{totalTotales})
+    || ($V{totalTotales}==null)
+    || ($V{totalProducidas}==null)
+)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#000000" backcolor="#FF6666">
+				<box>
+					<topPen lineWidth="1.0" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineColor="#000000"/>
+				</box>
+			</style>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[($V{totalProducidas} == $V{totalProducidas})]]></conditionExpression>
+			<style mode="Opaque" forecolor="#000000" backcolor="#33FF00">
+				<box>
+					<topPen lineWidth="1.0" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineColor="#000000"/>
+				</box>
+			</style>
+		</conditionalStyle>
+	</style>
+	<style name="CondicionalListaNoProducidas" mode="Opaque">
+		<conditionalStyle>
+			<conditionExpression><![CDATA[(
+    ($V{totalProducidas} != $V{totalTotales})
+    || ($V{totalProducidas}==null)
+    || ($V{totalTotales}==null)
+)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#000000" backcolor="#FF6666">
+				<box>
+					<topPen lineWidth="1.0" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineColor="#000000"/>
+				</box>
+			</style>
+		</conditionalStyle>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[($V{totalProducidas}-$V{totalProducidas} == 0)]]></conditionExpression>
+			<style mode="Opaque" forecolor="#000000" backcolor="#33FF00">
+				<box>
+					<topPen lineWidth="1.0" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineColor="#000000"/>
+				</box>
+			</style>
+		</conditionalStyle>
+	</style>
+	<parameter name="paqueteNum" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[0]]></defaultValueExpression>
+	</parameter>
+	<parameter name="obraNum" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[444]]></defaultValueExpression>
+	</parameter>
+	<parameter name="piezaElemento" class="java.lang.String">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<parameter name="categoria" class="java.lang.String">
+		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
+	</parameter>
+	<parameter name="opcionFinalizados" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[3]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[declare @obraNum int
+declare @paqueteNum int
+declare @elemento varchar(50)
+declare @categoria varchar(50)
+declare @opcionFinalizados int
+set @paqueteNum = $P{paqueteNum}
+set @obraNum = $P{obraNum}
+set @elemento = ''
+set @categoria = $P{categoria}
+set @opcionFinalizados = $P{opcionFinalizados}
+
+if @opcionFinalizados=1
+/**esta opcion es para mostrar solo paquetes con fecha de finalizacion (fecha not null)*/
+begin
+	Select 	Obras.numero as ObraNumero, Obras.nombre as ObraNombre,
+	Paquetes.numero as PaqueteNumero, Paquetes.descripcion as PaqueteDescripcion,
+
+	Piezas.codigo, COUNT (distinct Piezas.id_pieza) as total,
+	Piezas.elemento as PiezaElementos,Piezas.correlatividad as PiezasCorrelatividad, Piezas.area as PiezasArea,
+	Piezas.descripcion as PiezaDescripcion, Piezas.descripcion_extra as PiezasDescripcionExtra,
+	Piezas.largo as PiezasLargo,
+	AuxProducidos.Producidos, AuxNoProducidos.NoProducidos,
+	cast (Paquete_Empleado_Aprobado_Produccion.fecha as DATE) as fechaEnviadoProduccion,
+	Paquetes.fecha_fabricacion,
+	aux3.fecha,
+	Categoria_Ctrl_Produccion.categoria
+
+	from obras
+	inner join Paquetes
+	inner join Piezas
+	on Piezas.id_paquete=Paquetes.id_paquete
+	on paquetes.id_obra=Obras.id_obra
+	left join Categoria_Ctrl_Produccion
+	on Categoria_Ctrl_Produccion.id_categoria=Piezas.id_categoria
+	left join
+				(select Piezas.codigo as Codigo, count(Piezas.id_pieza) AS Producidos
+				from Piezas inner join paquetes
+				on paquetes.id_paquete=Piezas.id_paquete
+				where Piezas.finalizado=1 and piezas.activado=1 and Paquetes.activado=1  group by Piezas.codigo ) as AuxProducidos
+			on Piezas.codigo = AuxProducidos.Codigo
+			left join
+				(select Piezas.codigo as Codigo, count(Piezas.id_pieza) AS NoProducidos
+				from Piezas inner join paquetes
+				on paquetes.id_paquete=Piezas.id_paquete
+				where Piezas.finalizado=0 and Piezas.activado=1 and paquetes.activado=1 group by Piezas.codigo ) as AuxNoProducidos
+			on Piezas.codigo = AuxNoProducidos.Codigo
+	left join Paquete_Empleado_Aprobado_Produccion
+	on Paquete_Empleado_Aprobado_Produccion.id_paquete=Paquetes.id_paquete
+	left join
+				(select aux1.numero as numero, MAX(aux1.fecha) as fecha from
+					(Select Paquetes.Numero, max (Piezas.fecha_aprovacion_finalizacion) as fecha
+					from obras
+					inner join Paquetes
+					inner join Piezas
+					on Piezas.id_paquete=Paquetes.id_paquete
+					on paquetes.id_obra=Obras.id_obra
+					where paquetes.activado=1
+					and Obras.numero=@obraNum
+					and (paquetes.numero=@paqueteNum or @paqueteNum = 0 )
+					and (Piezas.elemento=@elemento or @elemento ='')
+					and piezas.area<>'Warehouse'
+					group by Paquetes.numero ) as aux1
+				left join
+					(select Paquetes.numero from obras
+					inner join Paquetes
+					inner join Piezas
+					on Piezas.id_paquete=Paquetes.id_paquete
+					on paquetes.id_obra=Obras.id_obra
+					where paquetes.activado=1
+					and Obras.numero=@obraNum
+					and (paquetes.numero=@paqueteNum or @paqueteNum = 0 )
+					and (Piezas.elemento=@elemento or @elemento ='')
+					and Piezas.fecha_aprovacion_finalizacion is null
+					and piezas.area<>'Warehouse') as aux2
+				on aux1.numero = aux2.numero
+				where aux2.numero is null
+				group by aux1.numero) as aux3
+	on Paquetes.numero=aux3.numero
+
+
+	where paquetes.activado=1
+	and Obras.numero=@obraNum
+	and (paquetes.numero=@paqueteNum or @paqueteNum = 0 )
+	and (Piezas.elemento=@elemento or @elemento ='')
+	and piezas.area<>'Warehouse'
+	and (Categoria_Ctrl_Produccion.categoria=@categoria or @categoria is null)
+	and aux3.fecha is not null
+
+	group by
+	Obras.numero, Obras.nombre,
+	Paquetes.numero, Paquetes.descripcion,
+	Piezas.codigo, Piezas.elemento, Piezas.correlatividad, Piezas.area,
+	Piezas.descripcion, Piezas.descripcion_extra, Piezas.largo,
+	AuxProducidos.Producidos, AuxNoProducidos.NoProducidos,
+	Paquete_Empleado_Aprobado_Produccion.fecha,
+	Paquetes.fecha_fabricacion, aux3.fecha,
+	Categoria_Ctrl_Produccion.categoria
+	order by ObraNumero, PaqueteNumero, categoria, codigo
+end
+else
+begin
+	if @opcionFinalizados=2
+	/**esta opcion es para mostrar solo paquetes sin fecha de finalizacion (fecha is null)*/
+	begin
+		Select 	Obras.numero as ObraNumero, Obras.nombre as ObraNombre,
+		Paquetes.numero as PaqueteNumero, Paquetes.descripcion as PaqueteDescripcion,
+		Piezas.codigo, COUNT (distinct Piezas.id_pieza) as total,
+		Piezas.elemento as PiezaElementos,Piezas.correlatividad as PiezasCorrelatividad, Piezas.area as PiezasArea,
+		Piezas.descripcion as PiezaDescripcion, Piezas.descripcion_extra as PiezasDescripcionExtra,
+		Piezas.largo as PiezasLargo,
+		AuxProducidos.Producidos, AuxNoProducidos.NoProducidos,
+		cast (Paquete_Empleado_Aprobado_Produccion.fecha as DATE) as fechaEnviadoProduccion,
+		Paquetes.fecha_fabricacion,
+		aux3.fecha,
+		Categoria_Ctrl_Produccion.categoria
+
+		from obras
+		inner join Paquetes
+		inner join Piezas
+		on Piezas.id_paquete=Paquetes.id_paquete
+		on paquetes.id_obra=Obras.id_obra
+		left join Categoria_Ctrl_Produccion
+		on Categoria_Ctrl_Produccion.id_categoria=Piezas.id_categoria
+		left join
+				(select Piezas.codigo as Codigo, count(Piezas.id_pieza) AS Producidos
+				from Piezas inner join paquetes
+				on paquetes.id_paquete=Piezas.id_paquete
+				where Piezas.finalizado=1 and piezas.activado=1 and Paquetes.activado=1  group by Piezas.codigo ) as AuxProducidos
+			on Piezas.codigo = AuxProducidos.Codigo
+			left join
+				(select Piezas.codigo as Codigo, count(Piezas.id_pieza) AS NoProducidos
+				from Piezas inner join paquetes
+				on paquetes.id_paquete=Piezas.id_paquete
+				where Piezas.finalizado=0 and Piezas.activado=1 and paquetes.activado=1 group by Piezas.codigo ) as AuxNoProducidos
+			on Piezas.codigo = AuxNoProducidos.Codigo
+		left join Paquete_Empleado_Aprobado_Produccion
+		on Paquete_Empleado_Aprobado_Produccion.id_paquete=Paquetes.id_paquete
+		left join
+					(select aux1.numero as numero, MAX(aux1.fecha) as fecha from
+						(Select Paquetes.Numero, max (Piezas.fecha_aprovacion_finalizacion) as fecha
+						from obras
+						inner join Paquetes
+						inner join Piezas
+						on Piezas.id_paquete=Paquetes.id_paquete
+						on paquetes.id_obra=Obras.id_obra
+						where paquetes.activado=1
+						and Obras.numero=@obraNum
+						and (paquetes.numero=@paqueteNum or @paqueteNum = 0 )
+						and (Piezas.elemento=@elemento or @elemento ='')
+						and piezas.area<>'Warehouse'
+						group by Paquetes.numero ) as aux1
+					left join
+						(select Paquetes.numero from obras
+						inner join Paquetes
+						inner join Piezas
+						on Piezas.id_paquete=Paquetes.id_paquete
+						on paquetes.id_obra=Obras.id_obra
+						where paquetes.activado=1
+						and Obras.numero=@obraNum
+						and (paquetes.numero=@paqueteNum or @paqueteNum = 0 )
+						and (Piezas.elemento=@elemento or @elemento ='')
+						and Piezas.fecha_aprovacion_finalizacion is null
+						and piezas.area<>'Warehouse') as aux2
+					on aux1.numero = aux2.numero
+					where aux2.numero is null
+					group by aux1.numero) as aux3
+		on Paquetes.numero=aux3.numero
+
+		where paquetes.activado=1
+		and piezas.activado=1
+		and Obras.numero=@obraNum
+		and (paquetes.numero=@paqueteNum or @paqueteNum = 0 )
+		and (Piezas.elemento=@elemento or @elemento ='')
+		and piezas.area<>'Warehouse'
+		and (Categoria_Ctrl_Produccion.categoria=@categoria or @categoria is null)
+		and aux3.fecha is null
+
+		group by
+		Obras.numero, Obras.nombre,
+		Paquetes.numero, Paquetes.descripcion,
+		Piezas.codigo, Piezas.elemento, Piezas.correlatividad, Piezas.area,
+		Piezas.descripcion, Piezas.descripcion_extra, Piezas.largo,
+		AuxProducidos.Producidos, AuxNoProducidos.NoProducidos,
+		Paquete_Empleado_Aprobado_Produccion.fecha,
+		Paquetes.fecha_fabricacion, aux3.fecha,
+		Categoria_Ctrl_Produccion.categoria
+		order by ObraNumero, PaqueteNumero, categoria, codigo
+	end
+	else
+	begin
+		if @opcionFinalizados=3
+		/**esta opcion es para mostrar todos los paquetes con o sin fecha de finalizacion */
+		begin
+			Select 	Obras.numero as ObraNumero, Obras.nombre as ObraNombre,
+			Paquetes.numero as PaqueteNumero, Paquetes.descripcion as PaqueteDescripcion,
+			Piezas.codigo, COUNT (distinct Piezas.id_pieza) as total,
+			Piezas.elemento as PiezaElementos,Piezas.correlatividad as PiezasCorrelatividad, Piezas.area as PiezasArea,
+			Piezas.descripcion as PiezaDescripcion, Piezas.descripcion_extra as PiezasDescripcionExtra,
+			Piezas.largo as PiezasLargo,
+			AuxProducidos.Producidos, AuxNoProducidos.NoProducidos,
+			cast (Paquete_Empleado_Aprobado_Produccion.fecha as DATE) as fechaEnviadoProduccion,
+			Paquetes.fecha_fabricacion,
+			aux3.fecha,
+			Categoria_Ctrl_Produccion.categoria
+
+			from obras
+			inner join Paquetes
+			inner join Piezas
+			on Piezas.id_paquete=Paquetes.id_paquete
+			on paquetes.id_obra=Obras.id_obra
+			left join Categoria_Ctrl_Produccion
+			on Categoria_Ctrl_Produccion.id_categoria=Piezas.id_categoria
+			left join
+				(select Piezas.codigo as Codigo, count(Piezas.id_pieza) AS Producidos
+				from Piezas inner join paquetes
+				on paquetes.id_paquete=Piezas.id_paquete
+				where Piezas.finalizado=1 and piezas.activado=1 and Paquetes.activado=1  group by Piezas.codigo ) as AuxProducidos
+			on Piezas.codigo = AuxProducidos.Codigo
+			left join
+				(select Piezas.codigo as Codigo, count(Piezas.id_pieza) AS NoProducidos
+				from Piezas inner join paquetes
+				on paquetes.id_paquete=Piezas.id_paquete
+				where Piezas.finalizado=0 and Piezas.activado=1 and paquetes.activado=1 group by Piezas.codigo ) as AuxNoProducidos
+			on Piezas.codigo = AuxNoProducidos.Codigo
+			left join Paquete_Empleado_Aprobado_Produccion
+			on Paquete_Empleado_Aprobado_Produccion.id_paquete=Paquetes.id_paquete
+			left join
+						(select aux1.numero as numero, MAX(aux1.fecha) as fecha from
+							(Select Paquetes.Numero, max (Piezas.fecha_aprovacion_finalizacion) as fecha
+							from obras
+							inner join Paquetes
+							inner join Piezas
+							on Piezas.id_paquete=Paquetes.id_paquete
+							on paquetes.id_obra=Obras.id_obra
+							where paquetes.activado=1
+							and Obras.numero=@obraNum
+							and (paquetes.numero=@paqueteNum or @paqueteNum = 0 )
+							and (Piezas.elemento=@elemento or @elemento ='')
+							and piezas.area<>'Warehouse'
+							group by Paquetes.numero ) as aux1
+						left join
+							(select Paquetes.numero from obras
+							inner join Paquetes
+							inner join Piezas
+							on Piezas.id_paquete=Paquetes.id_paquete
+							on paquetes.id_obra=Obras.id_obra
+							where paquetes.activado=1
+							and Obras.numero=@obraNum
+							and (paquetes.numero=@paqueteNum or @paqueteNum = 0 )
+							and (Piezas.elemento=@elemento or @elemento ='')
+							and Piezas.fecha_aprovacion_finalizacion is null
+							and piezas.area<>'Warehouse') as aux2
+						on aux1.numero = aux2.numero
+						where aux2.numero is null
+						group by aux1.numero) as aux3
+			on Paquetes.numero=aux3.numero
+
+			where paquetes.activado=1
+			and Obras.numero=@obraNum
+			and (paquetes.numero=@paqueteNum or @paqueteNum = 0 )
+			and (Piezas.elemento=@elemento or @elemento ='')
+			and piezas.area<>'Warehouse'
+			and (Categoria_Ctrl_Produccion.categoria=@categoria or @categoria is null)
+
+			group by
+			Obras.numero, Obras.nombre,
+			Paquetes.numero, Paquetes.descripcion,
+			Piezas.codigo, Piezas.elemento, Piezas.correlatividad, Piezas.area,
+			Piezas.descripcion, Piezas.descripcion_extra, Piezas.largo,
+			AuxProducidos.Producidos, AuxNoProducidos.NoProducidos,
+			Paquete_Empleado_Aprobado_Produccion.fecha,
+			Paquetes.fecha_fabricacion, aux3.fecha,
+			Categoria_Ctrl_Produccion.categoria
+			order by ObraNumero, PaqueteNumero, categoria, codigo
+		end
+	end
+end]]>
+	</queryString>
+	<field name="ObraNumero" class="java.lang.Integer"/>
+	<field name="ObraNombre" class="java.lang.String"/>
+	<field name="PaqueteNumero" class="java.lang.Integer"/>
+	<field name="PaqueteDescripcion" class="java.lang.String"/>
+	<field name="codigo" class="java.lang.Integer"/>
+	<field name="total" class="java.lang.Integer"/>
+	<field name="PiezaElementos" class="java.lang.String"/>
+	<field name="PiezasCorrelatividad" class="java.lang.String"/>
+	<field name="PiezasArea" class="java.lang.String"/>
+	<field name="PiezaDescripcion" class="java.lang.String"/>
+	<field name="PiezasDescripcionExtra" class="java.lang.String"/>
+	<field name="PiezasLargo" class="java.lang.Integer"/>
+	<field name="Producidos" class="java.lang.Integer"/>
+	<field name="NoProducidos" class="java.lang.Integer"/>
+	<field name="fechaEnviadoProduccion" class="java.lang.String"/>
+	<field name="fecha_fabricacion" class="java.lang.String"/>
+	<field name="fecha" class="java.lang.String"/>
+	<field name="categoria" class="java.lang.String"/>
+	<variable name="totalProducidas" class="java.lang.Integer" resetType="Group" resetGroup="Paquete" calculation="Sum">
+		<variableExpression><![CDATA[$F{Producidos}]]></variableExpression>
+	</variable>
+	<variable name="totalNoProducidas" class="java.lang.Integer" resetType="Group" resetGroup="Paquete" calculation="Sum">
+		<variableExpression><![CDATA[$F{NoProducidos}]]></variableExpression>
+	</variable>
+	<variable name="totalTotales" class="java.lang.Integer" resetType="Group" resetGroup="Paquete" calculation="Sum">
+		<variableExpression><![CDATA[$F{total}]]></variableExpression>
+	</variable>
+	<variable name="totalTotalesReporte" class="java.lang.Integer" resetType="Group" resetGroup="Obra" calculation="Sum">
+		<variableExpression><![CDATA[$F{total}]]></variableExpression>
+	</variable>
+	<variable name="totalProducidasReporte" class="java.lang.Integer" resetType="Group" resetGroup="Obra" calculation="Sum">
+		<variableExpression><![CDATA[$F{Producidos}]]></variableExpression>
+	</variable>
+	<variable name="totalNoProducidasReporte" class="java.lang.Integer" resetType="Group" resetGroup="Obra" calculation="Sum">
+		<variableExpression><![CDATA[$F{NoProducidos}]]></variableExpression>
+	</variable>
+	<group name="Obra">
+		<groupExpression><![CDATA[$F{ObraNumero}]]></groupExpression>
+		<groupFooter>
+			<band height="49">
+				<textField>
+					<reportElement x="421" y="11" width="95" height="18" uuid="48d21512-72bd-4c9e-a703-6ea51de88963"/>
+					<box>
+						<pen lineWidth="1.0"/>
+						<topPen lineWidth="1.0" lineStyle="Solid"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[($V{totalNoProducidasReporte}.equals( null )? "0" : $V{totalNoProducidasReporte}.toString())
++"/"+$V{totalTotalesReporte}.toString()]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="326" y="11" width="95" height="18" uuid="2991a3eb-45fc-476e-9b84-cd0c5a8be0ce"/>
+					<box>
+						<pen lineWidth="1.0"/>
+						<topPen lineWidth="1.0" lineStyle="Solid"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[($V{totalProducidasReporte}.equals( null )? "0" : $V{totalProducidasReporte}.toString())
++"/"+$V{totalTotalesReporte}.toString()]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="86" y="0" width="240" height="29" uuid="83a3c6ec-331e-49e8-ada1-16da77522c05"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+						<font size="15" isBold="true" isItalic="true" isUnderline="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Resumen obra " + $F{ObraNumero} + ":   "]]></textFieldExpression>
+				</textField>
+				<staticText>
+					<reportElement mode="Opaque" x="421" y="0" width="95" height="11" forecolor="#FFFFFF" backcolor="#000000" uuid="d0c9754e-1f2e-4ffd-a3d9-c8dcb46825f5"/>
+					<box>
+						<topPen lineWidth="1.0" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineColor="#000000"/>
+					</box>
+					<textElement>
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[ No producidas]]></text>
+				</staticText>
+				<staticText>
+					<reportElement mode="Opaque" x="326" y="0" width="95" height="11" forecolor="#FFFFFF" backcolor="#000000" uuid="eeb48a8b-b358-40c8-8406-4413fc58dad7"/>
+					<box>
+						<topPen lineWidth="1.0" lineColor="#000000"/>
+						<leftPen lineWidth="1.0" lineColor="#000000"/>
+						<bottomPen lineWidth="1.0" lineColor="#000000"/>
+						<rightPen lineWidth="1.0" lineColor="#000000"/>
+					</box>
+					<textElement>
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[ Producidas]]></text>
+				</staticText>
+				<line>
+					<reportElement x="0" y="0" width="555" height="1" uuid="9214e7d2-9d5b-4d37-af70-e0cb2d672860"/>
+					<graphicElement>
+						<pen lineWidth="1.5" lineStyle="Double"/>
+					</graphicElement>
+				</line>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="Paquete">
+		<groupExpression><![CDATA[$F{PaqueteNumero}]]></groupExpression>
+		<groupHeader>
+			<band height="28">
+				<textField>
+					<reportElement x="0" y="7" width="301" height="17" forecolor="#990000" uuid="e25b1f2c-46a0-48b1-b286-8fe0c14fddcf"/>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA['Lista: ' + $F{PaqueteNumero}
++
+' - Desc: ' +  $F{PaqueteDescripcion}]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement style="Separadoras Rojas" x="0" y="5" width="555" height="1" forecolor="#990000" uuid="2483cdfd-65c1-4370-8127-4145c7dba637"/>
+					<graphicElement>
+						<pen lineWidth="3.0"/>
+					</graphicElement>
+				</line>
+				<textField>
+					<reportElement x="399" y="6" width="76" height="20" uuid="eeb0ccb0-38f1-4bcd-a592-dcf35bad3158"/>
+					<textElement textAlignment="Center">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Fecha de terminacion: " + "\n" + $F{fecha_fabricacion}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="323" y="6" width="76" height="20" uuid="c5767561-b811-4558-8fb2-20d152b54e54"/>
+					<textElement textAlignment="Center">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Fecha de recibido: " + "\n" +  ($F{fechaEnviadoProduccion}.equals( null )? "No recibido" : $F{fechaEnviadoProduccion}.toString())]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement x="0" y="27" width="555" height="1" forecolor="#990000" uuid="2483cdfd-65c1-4370-8127-4145c7dba637"/>
+				</line>
+				<textField>
+					<reportElement x="475" y="6" width="76" height="20" uuid="4948f064-1f8a-4b72-a516-b5999d78579f"/>
+					<textElement textAlignment="Center">
+						<font size="7"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Fecha de terminado: " + "\n" +  ($F{fecha}.equals( null )? "No terminado" : $F{fecha}.toString())]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band height="32">
+				<textField>
+					<reportElement style="CondicionalListaProducidas" x="329" y="0" width="55" height="18" uuid="f808c09a-3d9b-4ea5-874c-7326fcf9b752"/>
+					<box>
+						<pen lineWidth="1.0"/>
+						<topPen lineWidth="1.0" lineStyle="Solid"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[($V{totalProducidas}.equals( null )? "0" : $V{totalProducidas}.toString())
++"/"+$V{totalTotales}.toString()]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="139" y="0" width="190" height="18" uuid="8293a4a0-e639-4667-9491-b2c29d41b003"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+						<font isBold="true" isItalic="true" isUnderline="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Resumen lista " + $F{PaqueteNumero} + ": "]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="CondicionalListaNoProducidas" x="384" y="0" width="53" height="18" uuid="7b07d430-faca-413f-9d3b-24b7a81646c5"/>
+					<box>
+						<pen lineWidth="1.0"/>
+						<topPen lineWidth="1.0" lineStyle="Solid"/>
+						<leftPen lineWidth="1.0" lineStyle="Solid"/>
+						<bottomPen lineWidth="1.0" lineStyle="Solid"/>
+						<rightPen lineWidth="1.0" lineStyle="Solid"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[($V{totalNoProducidas}.equals( null )? "0" : $V{totalNoProducidas}.toString())
++"/"+$V{totalTotales}.toString()]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="PiezasArea">
+		<groupExpression><![CDATA[$F{categoria}]]></groupExpression>
+		<groupHeader>
+			<band height="15">
+				<textField>
+					<reportElement x="13" y="0" width="157" height="14" uuid="59b75461-79fa-4a82-a851-400df700c2db"/>
+					<textElement>
+						<font size="10" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[($F{categoria}.equals(null)? "No categorizado" : $F{categoria}.toString())]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement style="Separadoras Rojas" x="13" y="14" width="541" height="1" forecolor="#990000" uuid="2483cdfd-65c1-4370-8127-4145c7dba637"/>
+					<graphicElement>
+						<pen lineWidth="3.0" lineColor="#000000"/>
+					</graphicElement>
+				</line>
+				<staticText>
+					<reportElement x="329" y="3" width="54" height="12" uuid="ecd9c55e-5c86-4588-91c7-2a7207f457f5"/>
+					<textElement>
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Prod.]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="383" y="3" width="51" height="11" uuid="b7af3d5b-6fa3-431f-b1d2-46af46866c5b"/>
+					<textElement>
+						<font size="8" isBold="true"/>
+					</textElement>
+					<text><![CDATA[No prod.]]></text>
+				</staticText>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="PiezaCodigo">
+		<groupExpression><![CDATA[$F{codigo}]]></groupExpression>
+		<groupHeader>
+			<band height="14">
+				<textField>
+					<reportElement x="33" y="0" width="296" height="11" uuid="5f4dc9fa-e450-4742-9e9f-18b76a59b3e6"/>
+					<textElement>
+						<font size="8"/>
+					</textElement>
+					<textFieldExpression><![CDATA[" "+$F{PiezaElementos} + "-" + $F{PiezasCorrelatividad} + " - " + $F{PiezaDescripcion}
+ + " - " + ($F{PiezasDescripcionExtra}.equals( null )? "" : $F{PiezasDescripcionExtra}) + " - " + $F{PiezasLargo}]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement x="32" y="0" width="1" height="12" uuid="e569420d-3f39-4bf3-ac44-36ffe689358b"/>
+				</line>
+				<textField>
+					<reportElement style="Footer Grupo Piezas" x="330" y="1" width="53" height="12" uuid="9eb14a41-6ac9-4b9a-b305-a046e60ab887"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="8" isBold="false" isItalic="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[($F{Producidos}.equals( null )? "0" : $F{Producidos}.toString())
++"/"+$F{total}.toString()]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement style="Footer Grupo Piezas" x="384" y="0" width="53" height="12" uuid="fcc60593-2fd2-4886-a799-68096c041217"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="false"/>
+					</textElement>
+					<textFieldExpression><![CDATA[($F{NoProducidos}.equals( null )? "0" : $F{NoProducidos}.toString())
++"/"+$F{total}.toString()]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement x="329" y="1" width="1" height="12" uuid="603b0ed7-914e-4569-bbc0-544616de5096"/>
+				</line>
+				<line>
+					<reportElement x="383" y="2" width="1" height="12" uuid="603b0ed7-914e-4569-bbc0-544616de5096"/>
+				</line>
+				<line>
+					<reportElement x="436" y="1" width="1" height="11" uuid="603b0ed7-914e-4569-bbc0-544616de5096"/>
+				</line>
+				<line>
+					<reportElement x="32" y="12" width="522" height="1" uuid="005d2214-d94e-4aed-8981-772194df5787"/>
+				</line>
+			</band>
+		</groupHeader>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="108" splitType="Stretch">
+			<image>
+				<reportElement x="0" y="0" width="74" height="73" uuid="908523fe-8fcc-47cc-b4fc-bac047d7e446"/>
+				<imageExpression><![CDATA["Reportes/logo01.jpg"]]></imageExpression>
+			</image>
+			<rectangle>
+				<reportElement mode="Transparent" x="0" y="0" width="551" height="86" uuid="66b53c79-60a8-4eb0-a3e8-a994b41ec898"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="74" y="0" width="481" height="35" forecolor="#000000" backcolor="#000000" uuid="747ef664-f296-4d16-9a66-4c7b5de894c2"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="SansSerif" size="22" isBold="true" isItalic="true" pdfFontName="Times-Roman"/>
+				</textElement>
+				<text><![CDATA[Lista de estado de producción]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="368" y="35" width="66" height="13" uuid="95d35ab4-23eb-44c6-9407-a5903f29af56"/>
+				<textElement textAlignment="Right">
+					<font size="8" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Fecha emisión:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header estatico" x="74" y="35" width="88" height="20" forecolor="#333333" backcolor="#FFFFFF" uuid="1de5f4a6-9d86-4c62-8ef1-ee7dd65ea128"/>
+				<textElement textAlignment="Right">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Número de obra:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="Column header estatico" x="74" y="55" width="88" height="18" forecolor="#333333" backcolor="#FFFFFF" uuid="450f1ca7-c0d9-44be-9590-ad323a76909c"/>
+				<textElement textAlignment="Right">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[Obra:]]></text>
+			</staticText>
+			<textField>
+				<reportElement style="Column header" x="165" y="35" width="203" height="20" uuid="5d9beb0d-81eb-4d5b-b7b2-2a12d2764e67"/>
+				<textFieldExpression><![CDATA[$F{ObraNumero}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="Column header" x="165" y="55" width="203" height="18" uuid="6219b413-aa4a-448d-847a-90724be7e749"/>
+				<textElement>
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ObraNombre}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="437" y="35" width="114" height="13" uuid="dbaf1b32-5120-4ecd-a505-7fad1caaedd6"/>
+				<textElement>
+					<font size="8" isBold="false" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="368" y="48" width="66" height="13" uuid="f0c32352-891a-4a32-afcf-738e3a308eea"/>
+				<textElement textAlignment="Right">
+					<font size="8" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Listas Incluidas:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="437" y="48" width="114" height="13" uuid="2d213755-4d9a-4f06-aa28-39ea5d074cee"/>
+				<textElement>
+					<font size="8" isBold="false" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($P{opcionFinalizados}.equals( 1 )? "Finalizadas" :
+    ($P{opcionFinalizados}.equals( 2 )? "No finalizadas" :
+        "Finalizadas y no finalizadas")
+
+)]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="368" y="60" width="66" height="13" uuid="427894d5-820c-404d-98db-e4000bdf77f2"/>
+				<textElement textAlignment="Right">
+					<font size="8" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Filtro listas:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="437" y="73" width="114" height="13" uuid="f7075695-a325-4663-a2ab-9536d4dbd5f6"/>
+				<textElement>
+					<font size="8" isBold="false" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($P{categoria}.equals( null )? "Todas las categorías" :$P{categoria})]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd/MM/yyyy h.mm a">
+				<reportElement x="437" y="60" width="114" height="13" uuid="5c66dca3-5a34-4379-b796-0e04d89ac1b8"/>
+				<textElement>
+					<font size="8" isBold="false" isItalic="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($P{paqueteNum}.equals( 0 )? "Todas las listas" : $P{paqueteNum}.toString())]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="368" y="73" width="66" height="13" uuid="c4fb2d35-29a8-4afb-afa2-301aab925e04"/>
+				<textElement textAlignment="Right">
+					<font size="8" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Filtro categoría:]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageFooter>
+		<band height="24" splitType="Stretch">
+			<textField>
+				<reportElement x="434" y="11" width="80" height="13" uuid="965027b5-ebed-44b5-acce-98968d0b974b"/>
+				<textElement textAlignment="Right">
+					<font size="8" isItalic="true" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Pagina "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="514" y="11" width="40" height="13" uuid="e7b1afd3-226b-4793-a52c-2e79d0006b6c"/>
+				<textElement>
+					<font size="8" isItalic="true" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>
